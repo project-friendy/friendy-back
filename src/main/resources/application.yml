@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: FriendyBeApplication
+
+friendy:
+  community:
+    server:
+      url: http://localhost:8080
