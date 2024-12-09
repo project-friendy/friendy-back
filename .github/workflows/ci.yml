@@ -30,7 +30,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
-          title: "Code Coverage"
+          title: "📊 Test Coverage Report"
           update-comment: true
           comment-mode: always
 
