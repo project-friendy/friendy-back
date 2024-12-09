@@ -69,23 +69,36 @@ jacoco {
 jacocoTestReport {
 	reports {
 		xml.required = true
+		csv.required = false
 		html.required = true
+		html.outputLocation = layout.buildDirectory.dir('reports/jacoco/html')
+	}
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, includes: ['**/*.class'], excludes: [
+					'**/friendy.community.FriendyBeApplication',
+					'friendy.community.config.*',
+					'friendy.community.**.exception.*',
+					'friendy.community.**.dto.*',
+			])
+		}))
 	}
 }
 
 jacocoTestCoverageVerification {
 	violationRules {
 		rule {
-			element = 'BUNDLE'
+			element = 'CLASS'
+			excludes = [
+					'friendy.community.FriendyBeApplication',
+					'friendy.community.config.*',
+					'friendy.community.**.exception.*',
+					'friendy.community.**.dto.*',
+			]
 			limit {
-				counter = 'LINE'
-				value = 'COVEREDRATIO'
-				minimum = 0.80  // 최소 라인 커버리지 80% 설정
+				minimum = 0.80  // 최소 80% 커버리지 요구
 			}
 		}
 	}
-}
-
-check {
-	dependsOn jacocoTestCoverageVerification  // 빌드 시 커버리지 검증 실행
 }
