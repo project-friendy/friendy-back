@@ -21,4 +21,8 @@ public class Member {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    public Member(String email) {
+        this.email = email;
+    }
 }
