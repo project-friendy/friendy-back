@@ -8,7 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Setup JDk 21
         uses: actions/setup-java@v4
@@ -31,6 +32,7 @@ jobs:
           min-coverage-changed-files: 80
           title: "Code Coverage"
           update-comment: true
+          comment-mode: always
 
       - name: Upload jacoco HTML report
         uses: actions/upload-artifact@v4
