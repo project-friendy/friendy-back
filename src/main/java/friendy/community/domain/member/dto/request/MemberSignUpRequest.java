@@ -23,7 +23,7 @@ public record MemberSignUpRequest(
 
         @Schema(description = "사용자 생일", example = "2002-08-13")
         @NotNull(message = "사용자 생일이 필요합니다")
-        LocalDate birth
+        LocalDate birthDate
 
     ) {
 }

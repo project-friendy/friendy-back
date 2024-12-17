@@ -1,5 +1,6 @@
 package friendy.community.domain.member.model;
 
+import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,15 @@ public class Member {
 
 
     private LocalDate birthDate;
+
+    private Member(final MemberSignUpRequest request) {
+        this.email = new Email(request.email());
+        this.nickname = new Nickname(request.nickname());
+        this.password = new Password(request.password());
+        this.birthDate = request.birthDate();
+    }
+
+    public static Member of(final MemberSignUpRequest request) {
+        return new Member(request);
+    }
 }
