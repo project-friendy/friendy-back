@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/auth")
 public class MemberController {
 
     private final MemberService memberService;
@@ -22,12 +22,7 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody MemberSignUpRequest memberSignUpRequest) {
 
-        if(memberService.checkLoginEmailDuplicate(memberSignUpRequest.email())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 이메일입니다.");
-        }
-
-        memberService.SignUp(memberSignUpRequest);
-
+        memberService.signUp(memberSignUpRequest);
         return ResponseEntity.ok("회원가입 성공");
 
     }
