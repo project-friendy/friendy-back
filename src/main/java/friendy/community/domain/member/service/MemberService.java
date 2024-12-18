@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepository  memberRepository;
 
     public boolean checkLoginEmailDuplicate(String email) {
         return memberRepository.existsByEmail(email);
@@ -22,7 +22,7 @@ public class MemberService {
         return memberRepository.existsByNickname(nickname);
     }
 
-    public void SignUp(MemberSignUpRequest memberSignUpRequest) {
+    public void signUp(MemberSignUpRequest memberSignUpRequest) {
 
 //        if (checkLoginEmailDuplicate(memberSignUpRequest.email())) {
 //            //예외추가
