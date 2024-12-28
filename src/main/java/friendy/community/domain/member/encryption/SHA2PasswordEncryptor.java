@@ -1,9 +1,12 @@
 package friendy.community.domain.member.encryption;
 
+import org.springframework.stereotype.Component;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+@Component
 public class SHA2PasswordEncryptor implements PasswordEncryptor{
 
     private final MessageDigest digest;
