@@ -22,20 +22,10 @@ public class MemberService {
         return memberRepository.existsByNickname(nickname);
     }
 
-    public void signUp(MemberSignUpRequest memberSignUpRequest) {
-
-//        if (checkLoginEmailDuplicate(memberSignUpRequest.email())) {
-//            //예외추가
-//        }
-//
-//        if (checkNicknameDuplicate(memberSignUpRequest.nickname())) {
-//            //예외추가
-//        }
-
-        Member member = Member.of(memberSignUpRequest);
-
+    public Long signUp(MemberSignUpRequest memberSignUpRequest) {
+        final Member member = Member.of(memberSignUpRequest);
         memberRepository.save(member);
 
-
+        return member.getId();
     }
 }
