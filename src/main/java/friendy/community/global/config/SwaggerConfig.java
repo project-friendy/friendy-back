@@ -18,24 +18,21 @@ public class SwaggerConfig {
     private static final String DOCS_DESCRIPTION = "Friendy 프로젝트의 API 문서입니다.";
 
     @Value("${friendy.community.server.url}")
-    private String devUrl; // 서버 URL 값을 주입받을 변수
+    private String devUrl;
 
     @Bean
     public OpenAPI openAPI() {
-        // Server 객체 생성 후 URL과 설명 설정
         final Server server = new Server();
-        server.setUrl(devUrl); // devUrl을 사용하여 서버 URL 설정
+        server.setUrl(devUrl);
         server.setDescription(SERVER_DESCRIPTION);
 
-        // API 문서 정보를 설정
         final Info info = new Info()
             .title(DOCS_TITLE)
             .version(DOCS_VERSION)
             .description(DOCS_DESCRIPTION);
 
-        // OpenAPI 객체 생성하여 서버와 문서 정보를 설정
         return new OpenAPI()
             .info(info)
-            .servers(List.of(server)); // 서버 URL 설정
+            .servers(List.of(server));
     }
 }
