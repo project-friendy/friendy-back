@@ -28,7 +28,6 @@ public class Member {
     @Column(nullable = false, length = 100)
     private Password password;
 
-
     private LocalDate birthDate;
 
     private Member(final MemberSignUpRequest request) {
