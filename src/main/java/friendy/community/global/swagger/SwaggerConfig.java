@@ -1,4 +1,4 @@
-package friendy.community.global.config;
+package friendy.community.global.swagger;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
