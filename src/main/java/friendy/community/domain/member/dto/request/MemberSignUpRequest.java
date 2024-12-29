@@ -18,9 +18,9 @@ public record MemberSignUpRequest(
         @Size(min = 2, max = 20, message = "닉네임은 2~20자 사이로 입력해주세요.")
         String nickname,
 
-        @Schema(description = "비밀번호. 영어와 숫자를 반드시 포함해야 합니다.", example = "passwordExample")
+        @Schema(description = "비밀번호. 영어와 숫자를 반드시 포함해야 합니다.", example = "passwordExample123!")
         @NotBlank(message = "비밀번호가 입력되지 않았습니다.")
-        @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[~!@#$%^&*?]).*$\n", message = "숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.")
+        @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[~!@#$%^&*?]).*$", message = "숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.")
         @Size(min = 8, max = 16, message = "비밀번호는 8~16자 사이로 입력해주세요.")
         String password,
 
