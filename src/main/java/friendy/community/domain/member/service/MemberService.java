@@ -5,6 +5,8 @@ import friendy.community.domain.member.encryption.PasswordEncryptor;
 import friendy.community.domain.member.encryption.SaltGenerator;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
+import friendy.community.global.exception.ErrorCode;
+import friendy.community.global.exception.FriendyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +21,18 @@ public class MemberService {
     private final PasswordEncryptor passwordEncryptor;
 
     public Long signUp(MemberSignUpRequest request) {
+        assertUniqueName(request.nickname());
         final String salt = saltGenerator.generate();
         final String encryptedPassword = passwordEncryptor.encrypt(request.password(), salt);
         final Member member = Member.of(request, encryptedPassword, salt);
         memberRepository.save(member);
 
         return member.getId();
+    }
+
+    public void assertUniqueName(String name) {
+        if (memberRepository.existsByNickname(name)) {
+            throw new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다.");
+        }
     }
 }
