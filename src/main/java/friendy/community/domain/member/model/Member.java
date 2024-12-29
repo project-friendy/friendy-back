@@ -19,25 +19,25 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    private Email email;
+    @Column(nullable = false)
+    private String email;
 
-    @Embedded
     @Column(unique = true, nullable = false)
-    private Nickname nickname;
+    private String nickname;
 
     @Column(nullable = false)
-    private Password password;
+    private String password;
 
     @Column(nullable = false)
     private String salt;
 
+    @Column(nullable = false)
     private LocalDate birthDate;
 
     private Member(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
-        this.email = new Email(request.email());
-        this.nickname = new Nickname(request.nickname());
-        this.password = new Password(encryptedPassword);
+        this.email = request.email();
+        this.nickname = request.nickname();
+        this.password = encryptedPassword;
         this.salt = salt;
         this.birthDate = request.birthDate();
     }
