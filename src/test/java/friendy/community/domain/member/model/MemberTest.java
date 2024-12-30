@@ -1,24 +1,32 @@
 package friendy.community.domain.member.model;
 
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import java.time.LocalDate;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MemberTest {
 
     @Test
-    void testMemberCreation() {
+    @DisplayName("Member.of 메서드는 요청 데이터를 바탕으로 Member 객체를 생성한다")
+    void ofMethodCreatesMemberFromRequest() {
+        // Given
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        String encryptedPassword = "securePassword123!";
+        String salt = "randomSalt";
 
-        MemberSignUpRequest request = new MemberSignUpRequest("test@example.com", "nickname", "password123", LocalDate.of(1990, 1, 1));
+        // When
+        Member member = Member.of(memberSignUpRequest, encryptedPassword, salt);
 
-        Member member = Member.of(request);
-
-        assertNotNull(member);
-        assertEquals("test@example.com", member.getEmail().getEmail());
-        assertEquals("nickname", member.getNickname().getNickname());
-        assertEquals("password123", member.getPassword().getPassword());
-        assertEquals(LocalDate.of(1990, 1, 1), member.getBirthDate());
+        // Then
+        assertThat(member.getEmail()).isEqualTo(memberSignUpRequest.email());
+        assertThat(member.getNickname()).isEqualTo(memberSignUpRequest.nickname());
+        assertThat(member.getPassword()).isEqualTo(encryptedPassword);
+        assertThat(member.getSalt()).isEqualTo(salt);
+        assertThat(member.getBirthDate()).isEqualTo(memberSignUpRequest.birthDate());
     }
+
 }
