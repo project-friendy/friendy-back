@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ class SwaggerConfigTest {
     @BeforeEach
     void setUp() {
         swaggerConfig = new SwaggerConfig();
-        swaggerConfig.OpenApiConfig(DEV_URL);
+        ReflectionTestUtils.setField(swaggerConfig, "devUrl", DEV_URL);
     }
 
     @Test
