@@ -21,14 +21,18 @@ public class MemberService {
     private final PasswordEncryptor passwordEncryptor;
 
     public Long signUp(MemberSignUpRequest request) {
-        assertUniqueEmail(request.email());
-        assertUniqueName(request.nickname());
+        validateUniqueMemberAttributes(request);
         final String salt = saltGenerator.generate();
         final String encryptedPassword = passwordEncryptor.encrypt(request.password(), salt);
         final Member member = Member.of(request, encryptedPassword, salt);
         memberRepository.save(member);
 
         return member.getId();
+    }
+
+    public void validateUniqueMemberAttributes(MemberSignUpRequest request) {
+        assertUniqueEmail(request.email());
+        assertUniqueName(request.nickname());
     }
 
     public void assertUniqueEmail(String email) {
