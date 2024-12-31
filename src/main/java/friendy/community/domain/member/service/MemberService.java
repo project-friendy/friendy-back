@@ -21,6 +21,7 @@ public class MemberService {
     private final PasswordEncryptor passwordEncryptor;
 
     public Long signUp(MemberSignUpRequest request) {
+        assertUniqueEmail(request.email());
         assertUniqueName(request.nickname());
         final String salt = saltGenerator.generate();
         final String encryptedPassword = passwordEncryptor.encrypt(request.password(), salt);
@@ -28,6 +29,12 @@ public class MemberService {
         memberRepository.save(member);
 
         return member.getId();
+    }
+
+    public void assertUniqueEmail(String email) {
+        if (memberRepository.existsByEmail(email)) {
+            throw new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다.");
+        }
     }
 
     public void assertUniqueName(String name) {
