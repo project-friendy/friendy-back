@@ -82,7 +82,8 @@ jacocoTestReport {
                                                                    '**/friendy/community/global/**',
                                                                    '**/friendy/community/**/exception/**',
                                                                    '**/friendy/community/**/dto/**',
-                                                                   '**/friendy/community/domain/common/**'])
+                                                                   '**/friendy/community/domain/common/**',
+                                                                   '**/generated/**'])
         }))
     }
 }
@@ -96,7 +97,8 @@ jacocoTestCoverageVerification {
                         'friendy.community.global.*',
                         'friendy.community.**.exception.*',
                         'friendy.community.**.dto.*',
-                        'friendy.community.domain.common.*']
+                        'friendy.community.domain.common.*',
+                        '**/generated/**']
             limit {
                 minimum = 0.80  // 최소 80% 커버리지 요구
             }
