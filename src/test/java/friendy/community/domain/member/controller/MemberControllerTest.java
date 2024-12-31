@@ -84,6 +84,27 @@ class MemberControllerTest {
     }
 
     @Test
+    @DisplayName("이메일이 중복되면 409 Conflict를 반환한다")
+    void signUpWithDuplicateEmailReturns409Conflict() throws Exception {
+        // Given
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("duplicate@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+
+        // Mock Service
+        when(memberService.signUp(any(MemberSignUpRequest.class)))
+                .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
+
+        // When & Then
+        mockMvc.perform(post("/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+                    .andDo(print())
+                    .andExpect(status().isConflict())
+                    .andExpect(result ->
+                            assertThat(result.getResolvedException().getMessage())
+                                    .contains("이미 가입된 이메일입니다."));
+    }
+
+    @Test
     @DisplayName("닉네임이 없으면 400 Bad Request를 반환한다")
     void signUpWithoutNicknameReturns400BadRequest() throws Exception {
         // Given

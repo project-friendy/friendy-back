@@ -38,6 +38,19 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("이메일이 중복되면 FriendyException을 던진다")
+    void throwsExceptionWhenDuplicateEmail() {
+        // Given
+        Member savedMember = memberRepository.save(MemberFixture.memberFixture());
+
+        // When & Then
+        assertThatThrownBy(() -> memberService.assertUniqueEmail(savedMember.getEmail()))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("이미 가입된 이메일입니다.")
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
+    }
+
+    @Test
     @DisplayName("닉네임이 중복되면 FriendyException을 던진다")
     void throwsExceptionWhenDuplicateNickname() {
         // Given
