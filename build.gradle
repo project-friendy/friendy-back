@@ -77,11 +77,11 @@ jacocoTestReport {
 
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, includes: ['**/*.class'], excludes: ['**/friendy.community.FriendyBeApplication',
-                                                                   'friendy.community.config.*',
-                                                                   'friendy.community.global.*',
-                                                                   'friendy.community.**.exception.*',
-                                                                   'friendy.community.**.dto.*',
+            fileTree(dir: it, includes: ['**/*.class'], excludes: ['**/friendy/community/FriendyBeApplication',
+                                                                   '**/friendy/community/config/**',
+                                                                   '**/friendy/community/global/**',
+                                                                   '**/friendy/community/**/exception/**',
+                                                                   '**/friendy/community/**/dto/**',
                                                                    '**/friendy/community/domain/common/**'])
         }))
     }
