@@ -4,7 +4,6 @@ import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.global.swagger.error.ApiErrorResponse;
 import friendy.community.global.swagger.error.ErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -25,6 +24,7 @@ public interface SpringDocMemberController {
             @ErrorCase(description = "생년월일 입력 없음", exampleMessage = "생년월일이 입력되지 않았습니다."),
     })
     @ApiErrorResponse(status = HttpStatus.CONFLICT, instance = "/signup", errorCases = {
+            @ErrorCase(description = "이메일 중복", exampleMessage = "이미 가입된 이메일입니다."),
             @ErrorCase(description = "닉네임 중복", exampleMessage = "닉네임이 이미 존재합니다."),
     })
     ResponseEntity<Void> signUp(MemberSignUpRequest request);

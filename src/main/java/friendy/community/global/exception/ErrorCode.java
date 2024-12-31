@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     INVALID_REQUEST(1101, HttpStatus.BAD_REQUEST),
-    DUPLICATE_NICKNAME(1201, HttpStatus.CONFLICT);
+
+    DUPLICATE_EMAIL(1201, HttpStatus.CONFLICT),
+    DUPLICATE_NICKNAME(1202, HttpStatus.CONFLICT);
 
     private final int code;
     private final HttpStatus httpStatus;
