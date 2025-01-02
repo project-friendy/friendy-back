@@ -21,8 +21,16 @@ import java.util.List;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<ProblemDetail> handleCodeZapException(FriendyException friendyException) {
+    public ResponseEntity<ProblemDetail> handleFriendyException(FriendyException friendyException) {
         log.warn("[FriendyException] {}: {}", friendyException.getClass().getName(), friendyException.getMessage());
+
+        return ResponseEntity.status(friendyException.getErrorCode().getHttpStatus())
+                .body(friendyException.toProblemDetail());
+    }
+
+    public ResponseEntity<ProblemDetail> handleNonAuthorizedException(UnAuthorizedException exception) {
+        FriendyException friendyException =
+                new FriendyException(ErrorCode.UNAUTHORIZED_USER, exception.getMessage());
 
         return ResponseEntity.status(friendyException.getErrorCode().getHttpStatus())
                 .body(friendyException.toProblemDetail());
