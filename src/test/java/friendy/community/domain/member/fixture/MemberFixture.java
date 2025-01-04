@@ -13,7 +13,6 @@ public class MemberFixture {
     public static Member memberFixture() {
         String encrypted = passwordEncryptor.encrypt(getFixturePlainPassword(), "salt");
         return new Member(
-                1L,
                 "example@friendy.com",
                 "bokSungKim",
                 encrypted,

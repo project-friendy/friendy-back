@@ -34,16 +34,12 @@ public class Member {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    private Member(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
-        this.email = request.email();
-        this.nickname = request.nickname();
-        this.password = encryptedPassword;
-        this.salt = salt;
-        this.birthDate = request.birthDate();
+    public Member(final String email, final String nickname, final String encryptedPassword, final String salt, final LocalDate birthDate) {
+        this(null, email, nickname, encryptedPassword, salt, birthDate);
     }
 
     public static Member of(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
-        return new Member(request, encryptedPassword, salt);
+        return new Member(request.email(), request.nickname(), encryptedPassword, salt, request.birthDate());
     }
 
     public boolean matchPassword(String password) {
