@@ -23,3 +23,12 @@ friendy:
   community:
     server:
       url: http://localhost:8080
+
+jwt:
+  access:
+    secret: "SpringBootJWTHelperTokenSecretKeyFreindy246!@#"
+    expiration: 1800000 # 30분
+
+  refresh:
+    secret: "SpringBootJWTHelperTokenSecretKeyFreindy246!@#"
+    expiration: 86400000 # 1일
