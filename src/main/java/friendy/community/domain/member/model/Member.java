@@ -45,4 +45,8 @@ public class Member {
     public static Member of(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
         return new Member(request, encryptedPassword, salt);
     }
+
+    public boolean matchPassword(String password) {
+        return this.password.equals(password);
+    }
 }
