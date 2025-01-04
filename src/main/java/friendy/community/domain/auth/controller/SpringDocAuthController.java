@@ -29,7 +29,7 @@ public interface SpringDocAuthController {
             @ErrorCase(description = "비밀번호 글자수 오류", exampleMessage = "비밀번호는 8~16자 사이로 입력해주세요."),
     })
     @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/login", errorCases = {
-            @ErrorCase(description = "아이디 불일치", exampleMessage = "존재하지 않는 아이디 moly 입니다."),
+            @ErrorCase(description = "이메일 불일치", exampleMessage = "해당 이메일의 회원이 존재하지 않습니다."),
             @ErrorCase(description = "비밀번호 불일치", exampleMessage = "로그인에 실패하였습니다. 비밀번호를 확인해주세요."),
     })
     ResponseEntity<Void> login(LoginRequest request);
