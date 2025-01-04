@@ -1,0 +1,37 @@
+package friendy.community.domain.auth.controller;
+
+import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.global.swagger.error.ApiErrorResponse;
+import friendy.community.global.swagger.error.ErrorCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+@Tag(name = "인증 및 인가 API", description = "인증 및 인가 API")
+public interface SpringDocAuthController {
+
+    @Operation(summary = "로그인")
+    @ApiResponse(responseCode = "200", description = "로그인 성공",
+            headers = {
+                    @Header(name = "Authorization", description = "액세스 토큰", required = true, schema = @Schema(type = "string")),
+                    @Header(name = "Authorization-Refresh", description = "리프레시 토큰", required = true, schema = @Schema(type = "string"))
+            }
+    )
+    @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/login", errorCases = {
+            @ErrorCase(description = "이메일 입력 없음", exampleMessage = "이메일이 입력되지 않았습니다."),
+            @ErrorCase(description = "이메일 형식 오류", exampleMessage = "이메일 형식으로 입력해주세요."),
+            @ErrorCase(description = "비밀번호 입력 없음", exampleMessage = "비밀번호가 입력되지 않았습니다."),
+            @ErrorCase(description = "비밀번호 형식 오류", exampleMessage = "숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다."),
+            @ErrorCase(description = "비밀번호 글자수 오류", exampleMessage = "비밀번호는 8~16자 사이로 입력해주세요."),
+    })
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/login", errorCases = {
+            @ErrorCase(description = "아이디 불일치", exampleMessage = "존재하지 않는 아이디 moly 입니다."),
+            @ErrorCase(description = "비밀번호 불일치", exampleMessage = "로그인에 실패하였습니다. 비밀번호를 확인해주세요."),
+    })
+    ResponseEntity<Void> login(LoginRequest request);
+
+}
