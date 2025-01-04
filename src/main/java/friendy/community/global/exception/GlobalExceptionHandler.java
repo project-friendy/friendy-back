@@ -28,14 +28,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(friendyException.toProblemDetail());
     }
 
-    public ResponseEntity<ProblemDetail> handleNonAuthorizedException(UnAuthorizedException exception) {
-        FriendyException friendyException =
-                new FriendyException(ErrorCode.UNAUTHORIZED_USER, exception.getMessage());
-
-        return ResponseEntity.status(friendyException.getErrorCode().getHttpStatus())
-                .body(friendyException.toProblemDetail());
-    }
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatusCode status, WebRequest request
