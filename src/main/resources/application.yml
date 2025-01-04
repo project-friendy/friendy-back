@@ -23,3 +23,12 @@ friendy:
   community:
     server:
       url: ${SERVER_URL}
+
+jwt:
+  access:
+    secret: ${TOKEN_SECRET_KEY}
+    expiration: 1800000 # 30분
+
+  refresh:
+    secret: ${TOKEN_SECRET_KEY}
+    expiration: 86400000 # 1일
