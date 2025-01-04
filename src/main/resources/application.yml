@@ -26,9 +26,9 @@ friendy:
 
 jwt:
   access:
-    secret: ${TOKEN_SECRET_KEY}
-    expiration: 1800000 # 30분
+    secret: ${JWT_SECRET_KEY}
+    expiration: ${JWT_ACCESS_EXPIRATION}
 
   refresh:
-    secret: ${TOKEN_SECRET_KEY}
-    expiration: 86400000 # 1일
+    secret: ${JWT_SECRET_KEY}
+    expiration: ${JWT_REFRESH_EXPIRATION}
