@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,6 +28,12 @@ public class AuthController implements SpringDocAuthController{
                 .header("Authorization-Refresh", "Bearer " + response.refreshToken())
                 .build();
     }
+
+    @PostMapping("/token/reissue")
+    public ResponseEntity<Void> reissueToken(
+            @RequestHeader("Authorization-Refresh") String refreshToken
+    ) {
+        final TokenResponse response = authService.reissueToken(refreshToken.replace("Bearer ", ""));
 
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + response.accessToken())
