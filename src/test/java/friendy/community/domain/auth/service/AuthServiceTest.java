@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static friendy.community.domain.auth.fixtures.TokenFixtures.CORRECT_REFRESH_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -65,6 +66,21 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("로그인에 실패하였습니다. 비밀번호를 확인해주세요.");
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 성공 시 새로운 액세스 토큰과 리프레시 토큰이 반환된다.")
+    void reissueTokenSuccessfullyReturnsNewTokens() {
+        // Given
+        Member savedMember = memberRepository.save(MemberFixture.memberFixture());
+        String refreshToken = CORRECT_REFRESH_TOKEN;
+
+        // When
+        TokenResponse response = authService.reissueToken(refreshToken);
+
+        // Then
+        assertThat(response.accessToken()).isNotNull();
+        assertThat(response.refreshToken()).isNotNull();
     }
 
 }
