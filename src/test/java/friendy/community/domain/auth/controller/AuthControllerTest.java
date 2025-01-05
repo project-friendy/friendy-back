@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -176,4 +177,78 @@ class AuthControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
     }
+
+    @Test
+    @DisplayName("토큰 재발급 요청이 성공적으로 처리되면 200 OK와 함께 새로운 토큰 헤더가 반환된다")
+    void reissueTokenSuccessfullyReturnsNewTokensInHeaders() throws Exception {
+        // Given
+        String refreshToken = "Bearer refreshToken";
+        TokenResponse tokenResponse = TokenResponse.of("newAccessToken", "newRefreshToken");
+
+        when(authService.reissueToken(anyString())).thenReturn(tokenResponse);
+
+        // When & Then
+        mockMvc.perform(post("/token/reissue")
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.AUTHORIZATION, "Bearer newAccessToken"))
+                .andExpect(header().string("Authorization-Refresh", "Bearer newRefreshToken"));
+    }
+
+    @Test
+    @DisplayName("잘못된 리프레시 토큰으로 토큰 재발급 요청 시 401 UNAUTHORIZED 반환")
+    void reissueTokenWithInvalidRefreshTokenReturns401() throws Exception {
+        // Given
+        String refreshToken = "Bearer invalidRefreshToken";
+
+        when(authService.reissueToken(anyString()))
+                .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(잘못된 리프레시 토큰) - 토큰 : invalidRefreshToken"));
+
+        // When & Then
+        mockMvc.perform(post("/token/reissue")
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertThat(result.getResolvedException().getMessage())
+                        .contains("인증 실패(잘못된 리프레시 토큰) - 토큰 : invalidRefreshToken"));
+    }
+
+    @Test
+    @DisplayName("만료된 리프레시 토큰으로 토큰 재발급 요청 시 401 UNAUTHORIZED 반환")
+    void reissueTokenWithExpiredRefreshTokenReturns401() throws Exception {
+        // Given
+        String refreshToken = "Bearer expiredRefreshToken";
+
+        when(authService.reissueToken(anyString()))
+                .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "리프레시 토큰이 만료되었습니다."));
+
+        // When & Then
+        mockMvc.perform(post("/token/reissue")
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertThat(result.getResolvedException().getMessage())
+                        .contains("리프레시 토큰이 만료되었습니다."));
+    }
+
+    @Test
+    @DisplayName("리프레시 토큰에 이메일 클레임이 없으면 401 UNAUTHORIZED 반환")
+    void reissueTokenWithMissingEmailClaimReturns401() throws Exception {
+        // Given
+        String refreshToken = "Bearer missingEmailClaimToken";
+
+        when(authService.reissueToken(anyString()))
+                .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
+
+        // When & Then
+        mockMvc.perform(post("/token/reissue")
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertThat(result.getResolvedException().getMessage())
+                        .contains("인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
+    }
+
+
 }
