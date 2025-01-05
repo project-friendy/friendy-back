@@ -240,7 +240,7 @@ class AuthControllerTest {
                 .thenReturn("expiredRefreshToken");
 
         when(authService.reissueToken("expiredRefreshToken"))
-                .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "리프레시 토큰이 만료되었습니다."));
+                .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(만료된 리프레시 토큰) - 토큰 : expiredRefreshToken"));
 
         // When & Then
         mockMvc.perform(post("/token/reissue")
@@ -248,7 +248,7 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertThat(result.getResolvedException().getMessage())
-                        .contains("리프레시 토큰이 만료되었습니다."));
+                        .contains("인증 실패(만료된 리프레시 토큰) - 토큰 : expiredRefreshToken"));
     }
 
     @Test

@@ -51,7 +51,7 @@ public interface SpringDocAuthController {
     )
     @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/token/reissue", errorCases = {
             @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}"),
-            @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "리프레시 토큰이 만료되었습니다."),
+            @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : {token}"),
             @ErrorCase(description = "리프레시 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : {token}")
     })
     ResponseEntity<Void> reissueToken(HttpServletRequest httpServletRequest);
