@@ -2,7 +2,7 @@ package friendy.community.domain.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.response.LoginResponse;
+import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.service.AuthService;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
@@ -44,7 +44,7 @@ class AuthControllerTest {
     void loginSuccessfullyReturnsTokensInHeaders() throws Exception {
         // Given
         LoginRequest loginRequest = new LoginRequest("example@friendy.com", "password123!");
-        LoginResponse loginResponse = LoginResponse.of("accessToken", "refreshToken");
+        TokenResponse loginResponse = TokenResponse.of("accessToken", "refreshToken");
 
         when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 

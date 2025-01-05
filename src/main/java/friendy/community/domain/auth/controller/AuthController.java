@@ -1,7 +1,7 @@
 package friendy.community.domain.auth.controller;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.response.LoginResponse;
+import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.service.AuthService;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
@@ -20,7 +20,13 @@ public class AuthController implements SpringDocAuthController{
     public ResponseEntity<Void> login(
             @Valid @RequestBody LoginRequest loginRequest
     ) {
-        final LoginResponse response = authService.login(loginRequest);
+        final TokenResponse response = authService.login(loginRequest);
+
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + response.accessToken())
+                .header("Authorization-Refresh", "Bearer " + response.refreshToken())
+                .build();
+    }
 
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + response.accessToken())
