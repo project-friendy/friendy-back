@@ -52,6 +52,30 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String extractEmailFromAccessToken(final String token) {
+        validateAccessToken(token);
+        final Jws<Claims> claimsJws = getAccessTokenParser().parseClaimsJws(token);
+        final String extractedEmail = claimsJws.getBody().get(EMAIL_KEY, String.class);
+        if (extractedEmail == null) {
+            final String logMessage = "인증 실패(JWT 액세스 토큰 Payload 이메일 누락) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
+        }
+
+        return extractedEmail;
+    }
+
+    public String extractEmailFromRefreshToken(final String token) {
+        validateRefreshToken(token);
+        final Jws<Claims> claimsJws = getRefreshTokenParser().parseClaimsJws(token);
+        final String extractedEmail = claimsJws.getBody().get(EMAIL_KEY, String.class);
+        if (extractedEmail == null) {
+            final String logMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
+        }
+
+        return extractedEmail;
+    }
+
     public void validateAccessToken(final String token) {
         try {
             final Claims claims = getAccessTokenParser().parseClaimsJws(token).getBody();
