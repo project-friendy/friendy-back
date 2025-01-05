@@ -2,13 +2,14 @@ package friendy.community.domain.auth.controller;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
+import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.service.AuthService;
-import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements SpringDocAuthController{
 
     private final AuthService authService;
+    private final JwtTokenExtractor jwtTokenExtractor;
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(
@@ -31,9 +33,10 @@ public class AuthController implements SpringDocAuthController{
 
     @PostMapping("/token/reissue")
     public ResponseEntity<Void> reissueToken(
-            @RequestHeader("Authorization-Refresh") String refreshToken
+            HttpServletRequest httpServletRequest
     ) {
-        final TokenResponse response = authService.reissueToken(refreshToken.replace("Bearer ", ""));
+        final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
+        final TokenResponse response = authService.reissueToken(refreshToken);
 
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + response.accessToken())
