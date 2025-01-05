@@ -64,7 +64,7 @@ class JwtTokenProviderTest {
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractEmailFromAccessToken(expiredAccessToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("액세스 토큰이 만료되었습니다.");
+                .hasMessageContaining("인증 실패(만료된 액세스 토큰) - 토큰 : " + expiredAccessToken);
     }
 
     @Test
@@ -127,7 +127,7 @@ class JwtTokenProviderTest {
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractEmailFromRefreshToken(expiredRefreshToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("리프레시 토큰이 만료되었습니다.");
+                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + expiredRefreshToken);
     }
 
     @Test

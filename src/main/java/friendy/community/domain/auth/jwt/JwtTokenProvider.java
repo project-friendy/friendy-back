@@ -83,7 +83,8 @@ public class JwtTokenProvider {
             final String logMessage = "인증 실패(잘못된 액세스 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         } catch (ExpiredJwtException e) {
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "액세스 토큰이 만료되었습니다.");
+            final String logMessage = "인증 실패(만료된 액세스 토큰) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
     }
 
@@ -94,7 +95,8 @@ public class JwtTokenProvider {
             final String logMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         } catch (ExpiredJwtException e) {
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "리프레시 토큰이 만료되었습니다.");
+            final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
     }
 
