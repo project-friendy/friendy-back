@@ -29,6 +29,14 @@ public class AuthService {
 
         return TokenResponse.of(accessToken, refreshToken);
     }
+
+    public TokenResponse reissueToken(final String refreshToken) {
+        final String extractedEmail = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
+        final Member member = getMemberByEmail(extractedEmail);
+        final String newAccessToken = jwtTokenProvider.generateAccessToken(member.getEmail());
+        final String newRefreshToken = jwtTokenProvider.generateRefreshToken(member.getEmail());
+
+        return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
     private Member getVerifiedMember(String email, String password) {
