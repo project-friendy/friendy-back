@@ -3,9 +3,11 @@ package friendy.community.domain.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.auth.dto.request.LoginRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
+import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.service.AuthService;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -37,6 +40,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private JwtTokenExtractor jwtTokenExtractor;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -183,9 +189,14 @@ class AuthControllerTest {
     void reissueTokenSuccessfullyReturnsNewTokensInHeaders() throws Exception {
         // Given
         String refreshToken = "Bearer refreshToken";
-        TokenResponse tokenResponse = TokenResponse.of("newAccessToken", "newRefreshToken");
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization-Refresh", "Bearer refreshToken");
 
-        when(authService.reissueToken(anyString())).thenReturn(tokenResponse);
+        when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
+                .thenReturn("refreshToken");
+
+        TokenResponse tokenResponse = TokenResponse.of("newAccessToken", "newRefreshToken");
+        when(authService.reissueToken("refreshToken")).thenReturn(tokenResponse);
 
         // When & Then
         mockMvc.perform(post("/token/reissue")
@@ -201,8 +212,13 @@ class AuthControllerTest {
     void reissueTokenWithInvalidRefreshTokenReturns401() throws Exception {
         // Given
         String refreshToken = "Bearer invalidRefreshToken";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization-Refresh", refreshToken);
 
-        when(authService.reissueToken(anyString()))
+        when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
+                .thenReturn("invalidRefreshToken");
+
+        when(authService.reissueToken("invalidRefreshToken"))
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(잘못된 리프레시 토큰) - 토큰 : invalidRefreshToken"));
 
         // When & Then
@@ -220,7 +236,10 @@ class AuthControllerTest {
         // Given
         String refreshToken = "Bearer expiredRefreshToken";
 
-        when(authService.reissueToken(anyString()))
+        when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
+                .thenReturn("expiredRefreshToken");
+
+        when(authService.reissueToken("expiredRefreshToken"))
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "리프레시 토큰이 만료되었습니다."));
 
         // When & Then
@@ -238,7 +257,10 @@ class AuthControllerTest {
         // Given
         String refreshToken = "Bearer missingEmailClaimToken";
 
-        when(authService.reissueToken(anyString()))
+        when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
+                .thenReturn("missingEmailClaimToken");
+
+        when(authService.reissueToken("missingEmailClaimToken"))
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
 
         // When & Then
@@ -249,6 +271,5 @@ class AuthControllerTest {
                 .andExpect(result -> assertThat(result.getResolvedException().getMessage())
                         .contains("인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
     }
-
 
 }
