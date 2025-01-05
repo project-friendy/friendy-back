@@ -1,7 +1,7 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.response.LoginResponse;
+import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.encryption.PasswordEncryptor;
 import friendy.community.domain.member.model.Member;
@@ -22,12 +22,13 @@ public class AuthService {
     private final PasswordEncryptor passwordEncryptor;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginResponse login(final LoginRequest request) {
+    public TokenResponse login(final LoginRequest request) {
         final Member member = getVerifiedMember(request.email(), request.password());
         final String accessToken = jwtTokenProvider.generateAccessToken(request.email());
         final String refreshToken = jwtTokenProvider.generateRefreshToken(request.email());
-        
-        return LoginResponse.of(accessToken, refreshToken);
+
+        return TokenResponse.of(accessToken, refreshToken);
+    }
     }
 
     private Member getVerifiedMember(String email, String password) {

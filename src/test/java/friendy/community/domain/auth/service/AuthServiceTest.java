@@ -1,7 +1,7 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.response.LoginResponse;
+import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
@@ -35,7 +35,7 @@ class AuthServiceTest {
         LoginRequest loginRequest = new LoginRequest(savedMember.getEmail(), MemberFixture.getFixturePlainPassword());
 
         // When
-        LoginResponse response = authService.login(loginRequest);
+        TokenResponse response = authService.login(loginRequest);
 
         // Then
         assertThat(response.accessToken()).isNotNull();
