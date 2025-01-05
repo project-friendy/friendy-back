@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "인증 및 인가 API", description = "인증 및 인가 API")
 public interface SpringDocAuthController {
@@ -33,5 +34,19 @@ public interface SpringDocAuthController {
             @ErrorCase(description = "비밀번호 불일치", exampleMessage = "로그인에 실패하였습니다. 비밀번호를 확인해주세요."),
     })
     ResponseEntity<Void> login(LoginRequest request);
+
+    @Operation(summary = "토큰 재발급")
+    @ApiResponse(responseCode = "200", description = "토큰 재발급 성공",
+            headers = {
+                    @Header(name = "Authorization", description = "새로운 액세스 토큰", required = true, schema = @Schema(type = "string")),
+                    @Header(name = "Authorization-Refresh", description = "새로운 리프레시 토큰", required = true, schema = @Schema(type = "string"))
+            }
+    )
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/token/reissue", errorCases = {
+            @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "리프레시 토큰이 만료되었습니다."),
+            @ErrorCase(description = "리프레시 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : {token}")
+    })
+    ResponseEntity<Void> reissueToken(@RequestHeader("Authorization-Refresh") String refreshToken);
 
 }
