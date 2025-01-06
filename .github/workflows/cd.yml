@@ -16,7 +16,10 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            source ~/.bashrc
+            export SERVER_URL=${{ secrets.SERVER_URL }}
+            export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            export JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}
+            export JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}
             cd ~/friendy_be
             git pull origin main
             ./gradlew clean build
