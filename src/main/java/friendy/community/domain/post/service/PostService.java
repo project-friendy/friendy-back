@@ -4,7 +4,6 @@ import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.model.Member;
-import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
@@ -23,13 +22,13 @@ public class PostService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
 
-    public long savePost(PostCreateRequest postCreateRequest, HttpServletRequest httpServletRequest) {
+    public long savePost(final PostCreateRequest postCreateRequest, final HttpServletRequest httpServletRequest) {
 
-        String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
+        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
 
-        String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
+        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
 
-        Member member = authService.getMemberByEmail(email);
+        final Member member = authService.getMemberByEmail(email);
 
         final Post post = Post.of(postCreateRequest, member);
         postRepository.save(post);
