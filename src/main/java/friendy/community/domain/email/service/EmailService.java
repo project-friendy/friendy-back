@@ -28,8 +28,8 @@ public class EmailService {
 
     public void sendAuthenticatedEmail(final EmailRequest request) {
         try {
-            final String code = generateAndSaveAuthCode(request.email());
-            final MimeMessage message = createEmailMessage(request.email(), code);
+            final String authCode = generateAndSaveAuthCode(request.email());
+            final MimeMessage message = createEmailMessage(request.email(), authCode);
             mailSender.send(message);
         } catch (MessagingException e) {
             throw new FriendyException(ErrorCode.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다.");
@@ -49,17 +49,17 @@ public class EmailService {
     }
 
     private String generateAndSaveAuthCode(final String email) {
-        final String code = generateAuthCode();
-        saveAuthCode(email, code);
-        return code;
+        final String authCode = generateAuthCode();
+        saveAuthCode(email, authCode);
+        return authCode;
     }
 
-    private MimeMessage createEmailMessage(final String toEmail, final String code) throws MessagingException {
+    private MimeMessage createEmailMessage(final String toEmail, final String authCode) throws MessagingException {
         final MimeMessage message = mailSender.createMimeMessage();
         final MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setTo(toEmail);
         helper.setSubject("Friendy Community 이메일 인증 코드");
-        helper.setText(getEmailContent(code), true);
+        helper.setText(getEmailContent(authCode), true);
         return message;
     }
 
@@ -69,14 +69,14 @@ public class EmailService {
         return String.format("%06d", random.nextInt(maxRange));
     }
 
-    private void saveAuthCode(final String email, final String code) {
-        redisTemplate.opsForValue().set(email, code, CODE_EXPIRE_MILLIS, TimeUnit.MILLISECONDS);
+    private void saveAuthCode(final String email, final String authCode) {
+        redisTemplate.opsForValue().set(email, authCode, CODE_EXPIRE_MILLIS, TimeUnit.MILLISECONDS);
     }
 
     private String getEmailContent(final String authCode) {
         final Context context = new Context();
         context.setVariable("authCode", authCode);
-        return templateEngine.process("auth-email", context);
+        return templateEngine.process("email", context);
     }
 
 }
