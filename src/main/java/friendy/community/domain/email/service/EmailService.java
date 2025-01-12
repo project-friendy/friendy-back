@@ -36,6 +36,18 @@ public class EmailService {
         }
     }
 
+    public void verifyAuthCode(final VerifyCodeRequest request) {
+        final String savedCode = redisTemplate.opsForValue().get(request.email());
+
+        if (savedCode == null) {
+            throw new FriendyException(ErrorCode.INVALID_REQUEST, "인증번호가 존재하지 않습니다.");
+        }
+
+        if (!savedCode.equals(request.authCode())) {
+            throw new FriendyException(ErrorCode.INVALID_REQUEST, "인증번호가 일치하지 않습니다.");
+        }
+    }
+
     private String generateAndSaveAuthCode(final String email) {
         final String code = generateAuthCode();
         saveAuthCode(email, code);
