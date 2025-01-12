@@ -1,4 +1,7 @@
 spring:
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
   application:
     name: FriendyBeApplication
   datasource:
@@ -29,10 +32,12 @@ spring:
           auth: true
           starttls:
             enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
 
 friendy:
   community:
