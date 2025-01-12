@@ -24,4 +24,10 @@ public class EmailController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/verify-code")
+    public ResponseEntity<Void> verifyAuthCode(@Valid @RequestBody VerifyCodeRequest request) {
+        emailService.verifyAuthCode(request);
+        return ResponseEntity.ok().build();
+    }
+
 }
