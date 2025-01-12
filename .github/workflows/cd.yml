@@ -16,6 +16,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
+            export REDIS_HOST=${{ secrets.REDIS_HOST }}
+            export MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
             export SERVER_URL=${{ secrets.SERVER_URL }}
             export JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             export JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}
