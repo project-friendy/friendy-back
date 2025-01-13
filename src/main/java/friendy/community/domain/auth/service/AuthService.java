@@ -42,7 +42,8 @@ public class AuthService {
         final String salt = saltGenerator.generate();
         final String encryptedPassword = passwordEncryptor.encrypt(request.newPassword(), salt);
 
-        member.resetPassword(encryptedPassword);
+        member.resetPassword(encryptedPassword, salt);
+        memberRepository.save(member);
     }
 
     public TokenResponse reissueToken(final String refreshToken) {
@@ -54,15 +55,15 @@ public class AuthService {
         return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
+    }
+
     private Member getVerifiedMember(String email, String password) {
         Member member = getMemberByEmail(email);
         validateCorrectPassword(member, password);
         return member;
-    }
-
-    private Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
     }
 
     private void validateCorrectPassword(Member member, String password) {
