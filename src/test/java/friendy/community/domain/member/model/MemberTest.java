@@ -38,7 +38,7 @@ class MemberTest {
         String newEncryptedPassword = "newSecurePw123!";
 
         // When
-        member.resetPassword(newEncryptedPassword);
+        member.resetPassword(newEncryptedPassword, member.getSalt());
 
         // Then
         assertThat(member.getPassword()).isEqualTo(newEncryptedPassword);
