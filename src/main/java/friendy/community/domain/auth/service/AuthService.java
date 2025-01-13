@@ -1,6 +1,7 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.domain.auth.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.encryption.PasswordEncryptor;
