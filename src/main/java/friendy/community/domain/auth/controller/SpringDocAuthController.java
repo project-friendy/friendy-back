@@ -1,6 +1,7 @@
 package friendy.community.domain.auth.controller;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.domain.auth.dto.request.PasswordRequest;
 import friendy.community.global.swagger.error.ApiErrorResponse;
 import friendy.community.global.swagger.error.ErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,13 @@ public interface SpringDocAuthController {
             @ErrorCase(description = "비밀번호 불일치", exampleMessage = "로그인에 실패하였습니다. 비밀번호를 확인해주세요."),
     })
     ResponseEntity<Void> login(LoginRequest request);
+
+    @Operation(summary = "비밀번호 변경")
+    @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공")
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/auth/password", errorCases = {
+            @ErrorCase(description = "이메일 불일치", exampleMessage = "해당 이메일의 회원이 존재하지 않습니다.")
+    })
+    ResponseEntity<Void> password(PasswordRequest passwordRequest);
 
     @Operation(
             summary = "토큰 재발급",
