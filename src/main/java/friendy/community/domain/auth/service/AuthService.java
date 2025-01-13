@@ -1,9 +1,11 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.domain.auth.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.encryption.PasswordEncryptor;
+import friendy.community.domain.member.encryption.SaltGenerator;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,12 +26,23 @@ public class AuthService {
     private final PasswordEncryptor passwordEncryptor;
     private final JwtTokenProvider jwtTokenProvider;
 
+    public final SaltGenerator saltGenerator;
+
     public TokenResponse login(final LoginRequest request) {
         final Member member = getVerifiedMember(request.email(), request.password());
         final String accessToken = jwtTokenProvider.generateAccessToken(request.email());
         final String refreshToken = jwtTokenProvider.generateRefreshToken(request.email());
 
         return TokenResponse.of(accessToken, refreshToken);
+    }
+
+    public void resetPassword(PasswordRequest request) {
+        Member member = getMemberByEmail(request.email());
+
+        final String salt = saltGenerator.generate();
+        final String encryptedPassword = passwordEncryptor.encrypt(request.newPassword(), salt);
+
+        member.resetPassword(encryptedPassword);
     }
 
     public TokenResponse reissueToken(final String refreshToken) {
