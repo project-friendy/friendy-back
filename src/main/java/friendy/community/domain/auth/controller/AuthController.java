@@ -38,8 +38,7 @@ public class AuthController implements SpringDocAuthController{
     ) {
         authService.resetPassword(passwordRequest);
 
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/token/reissue")
