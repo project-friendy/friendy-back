@@ -1,6 +1,7 @@
 package friendy.community.domain.auth.controller;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.domain.auth.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.service.AuthService;
@@ -28,6 +29,16 @@ public class AuthController implements SpringDocAuthController{
         return ResponseEntity.ok()
                 .header("Authorization", "Bearer " + response.accessToken())
                 .header("Authorization-Refresh", "Bearer " + response.refreshToken())
+                .build();
+    }
+
+    @PostMapping("/auth/password")
+    public ResponseEntity<Void> password(
+        @Valid @RequestBody PasswordRequest passwordRequest
+    ) {
+        authService.resetPassword(passwordRequest);
+
+        return ResponseEntity.ok()
                 .build();
     }
 
