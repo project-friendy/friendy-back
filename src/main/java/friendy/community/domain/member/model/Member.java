@@ -31,8 +31,9 @@ public class Member {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    public void resetPassword(final String password) {
+    public void resetPassword(final String password, final String salt) {
         this.password = password;
+        this.salt = salt;
     }
 
     public Member(final String email, final String nickname, final String encryptedPassword, final String salt, final LocalDate birthDate) {
