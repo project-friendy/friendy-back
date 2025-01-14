@@ -1,12 +1,14 @@
 package friendy.community.domain.post.service;
 
+import friendy.community.domain.auth.jwt.JwtTokenExtractor;
+import friendy.community.domain.auth.jwt.JwtTokenProvider;
+import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
-import friendy.community.global.exception.ErrorCode;
-import friendy.community.global.exception.FriendyException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,23 +19,21 @@ import org.springframework.stereotype.Service;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
+    private final JwtTokenExtractor jwtTokenExtractor;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthService authService;
 
-    public long savePost(PostCreateRequest postCreateRequest, String email) {
+    public long savePost(PostCreateRequest postCreateRequest, HttpServletRequest httpServletRequest) {
 
-        Member member = findMemberByEmail(email);
+        String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
 
-        final Post post = Post.of(postCreateRequest,member.getId());
+        String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
+
+        Member member = authService.getMemberByEmail(email);
+
+        final Post post = Post.of(postCreateRequest, member);
         postRepository.save(post);
         return post.getId();
-    }
-
-    public Member findMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
-            .orElseThrow(() -> new FriendyException(
-                ErrorCode.UNAUTHORIZED_EMAIL,
-                "해당 이메일의 회원이 존재하지 않습니다."
-            ));
     }
 
 }
