@@ -19,16 +19,13 @@ import java.net.URI;
 public class PostController implements SpringDocPostController {
 
     private final PostService postService;
-    private final JwtTokenExtractor jwtTokenExtractor;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/posts")
-    public ResponseEntity<Void> createPost(
-            HttpServletRequest httpServletRequest,
-            @Valid @RequestBody PostCreateRequest postCreateRequest
-            ) {
+    public ResponseEntity<Void> createPost(HttpServletRequest httpServletRequest, @Valid @RequestBody PostCreateRequest postCreateRequest) {
 
-        return ResponseEntity.created(URI.create("/posts/" + postService.savePost(postCreateRequest, jwtTokenProvider.extractEmailFromAccessToken(jwtTokenExtractor.extractAccessToken(httpServletRequest))))).build();
+        Long postId = postService.savePost(postCreateRequest, httpServletRequest);
+
+        return ResponseEntity.created(URI.create("/posts/" + postId)).build();
 
     }
 }
