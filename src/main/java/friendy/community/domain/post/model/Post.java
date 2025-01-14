@@ -25,27 +25,19 @@ public class Post extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private LocalDate createdAt;
-
-    @CreatedDate
-    private LocalDate createdDate;
-
-    @LastModifiedDate
-    private LocalDate modifiedDate;
-
-    public Post(final Long memberId , final String title, final String content, final LocalDate createdAt) {
-        this(null, memberId, title, content, createdAt);
+    protected Post(final PostCreateRequest request, final Member member) {
+        this.content = request.content();
+        this.member = member;
     }
 
-    public static Post of(final PostCreateRequest request,final Long memberId) {
-        return new Post(memberId, request.title(), request.content(), request.createdAt());
+    public static Post of(final PostCreateRequest request, final Member member) {
+        return new Post(request, member);
     }
 
 
