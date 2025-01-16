@@ -48,11 +48,11 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                    .andDo(print())
-                    .andExpect(status().isCreated())
-                    .andExpect(header().string("Location", "/users/1"));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andExpect(header().string("Location", "/users/1"));
     }
 
     @Test
@@ -63,10 +63,10 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -77,10 +77,10 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -91,17 +91,17 @@ class MemberControllerTest {
 
         // Mock Service
         when(memberService.signUp(any(MemberSignUpRequest.class)))
-                .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
+            .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                    .andDo(print())
-                    .andExpect(status().isConflict())
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException().getMessage())
-                                    .contains("이미 가입된 이메일입니다."));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isConflict())
+            .andExpect(result ->
+                assertThat(result.getResolvedException().getMessage())
+                    .contains("이미 가입된 이메일입니다."));
     }
 
     @Test
@@ -112,32 +112,32 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
     @ParameterizedTest
     @DisplayName("닉네임이 길이 제한을 벗어나면 400 Bad Request를 반환한다")
     @CsvSource({
-            "example@friendy.com, a, password123!, 닉네임은 2~20자 사이로 입력해주세요.",
-            "example@friendy.com, thisisaveryverylongnickname, password123!, 닉네임은 2~20자 사이로 입력해주세요."
+        "example@friendy.com, a, password123!, 닉네임은 2~20자 사이로 입력해주세요.",
+        "example@friendy.com, thisisaveryverylongnickname, password123!, 닉네임은 2~20자 사이로 입력해주세요."
     })
     void signUpWithInvalidNicknameLengthReturns400BadRequest(
-            String email, String nickname, String password, String expectedMessage) throws Exception {
+        String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
         MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException().getMessage())
-                                    .contains(expectedMessage));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(result ->
+                assertThat(result.getResolvedException().getMessage())
+                    .contains(expectedMessage));
     }
 
     @Test
@@ -148,17 +148,17 @@ class MemberControllerTest {
 
         // Mock Service
         when(memberService.signUp(any(MemberSignUpRequest.class)))
-                .thenThrow(new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다."));
+            .thenThrow(new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다."));
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                    .andDo(print())
-                    .andExpect(status().isConflict())
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException().getMessage())
-                                    .contains("닉네임이 이미 존재합니다."));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isConflict())
+            .andExpect(result ->
+                assertThat(result.getResolvedException().getMessage())
+                    .contains("닉네임이 이미 존재합니다."));
     }
 
     @Test
@@ -169,54 +169,54 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
     @ParameterizedTest
     @DisplayName("비밀번호가 숫자, 영문자, 특수문자를 포함하지 않으면 400 Bad Request를 반환한다")
     @CsvSource({
-            "example@friendy.com, validNickname, simplepassword, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.",
-            "example@friendy.com, validNickname, password123, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.",
-            "example@friendy.com, validNickname, 12345678, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다."
+        "example@friendy.com, validNickname, simplepassword, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.",
+        "example@friendy.com, validNickname, password123, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다.",
+        "example@friendy.com, validNickname, 12345678, 숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다."
     })
     void signUpWithInvalidPasswordPatternReturns400BadRequest(
-            String email, String nickname, String password, String expectedMessage) throws Exception {
+        String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
         MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(result ->
+                assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
     }
 
     @ParameterizedTest
     @DisplayName("비밀번호가 길이 제한을 벗어나면 400 Bad Request를 반환한다")
     @CsvSource({
-            "example@friendy.com, bokSungKim, short, 비밀번호는 8~16자 사이로 입력해주세요.",
-            "example@friendy.com, bokSungKim, thispasswordiswaytoolong123!, 비밀번호는 8~16자 사이로 입력해주세요."
+        "example@friendy.com, bokSungKim, short, 비밀번호는 8~16자 사이로 입력해주세요.",
+        "example@friendy.com, bokSungKim, thispasswordiswaytoolong123!, 비밀번호는 8~16자 사이로 입력해주세요."
     })
     void signUpWithInvalidPasswordLengthReturns400BadRequest(
-            String email, String nickname, String password, String expectedMessage) throws Exception {
+        String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
         MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
 
         // When & Then
         mockMvc.perform(post("/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andDo(print())
-                    .andExpect(status().isBadRequest())
-                    .andExpect(result ->
-                            assertThat(result.getResolvedException().getMessage())
-                                    .contains(expectedMessage));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(result ->
+                assertThat(result.getResolvedException().getMessage())
+                    .contains(expectedMessage));
     }
 
     @Test
@@ -227,10 +227,10 @@ class MemberControllerTest {
 
         // When & Then
         mockMvc.perform(post("/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+            .andDo(print())
+            .andExpect(status().isBadRequest());
     }
 
 }
