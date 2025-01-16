@@ -1,5 +1,7 @@
 package friendy.community.domain.member.service;
 
+import friendy.community.domain.member.dto.request.PasswordRequest;
+import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.encryption.PasswordEncryptor;
 import friendy.community.domain.member.encryption.SaltGenerator;
@@ -19,6 +21,8 @@ public class MemberService {
     private final MemberRepository  memberRepository;
     private final SaltGenerator saltGenerator;
     private final PasswordEncryptor passwordEncryptor;
+    public final AuthService authService;
+
 
     public Long signUp(MemberSignUpRequest request) {
         validateUniqueMemberAttributes(request);
@@ -28,6 +32,16 @@ public class MemberService {
         memberRepository.save(member);
 
         return member.getId();
+    }
+
+    public void resetPassword(PasswordRequest request) {
+        Member member = authService.getMemberByEmail(request.email());
+
+        final String salt = saltGenerator.generate();
+        final String encryptedPassword = passwordEncryptor.encrypt(request.newPassword(), salt);
+
+        member.resetPassword(encryptedPassword, salt);
+        memberRepository.save(member);
     }
 
     public void validateUniqueMemberAttributes(MemberSignUpRequest request) {

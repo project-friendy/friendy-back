@@ -1,5 +1,6 @@
 package friendy.community.domain.member.controller;
 
+import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.service.MemberService;
 import jakarta.validation.Valid;
@@ -20,5 +21,14 @@ public class MemberController implements SpringDocMemberController{
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@Valid @RequestBody MemberSignUpRequest request) {
         return ResponseEntity.created(URI.create("/users/" + memberService.signUp(request))).build();
+    }
+
+    @PostMapping("/auth/password")
+    public ResponseEntity<Void> password(
+            @Valid @RequestBody PasswordRequest passwordRequest
+    ) {
+        memberService.resetPassword(passwordRequest);
+
+        return ResponseEntity.ok().build();
     }
 }

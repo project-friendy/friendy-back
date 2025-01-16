@@ -1,4 +1,4 @@
-package friendy.community.domain.auth.dto.request;
+package friendy.community.domain.member.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
