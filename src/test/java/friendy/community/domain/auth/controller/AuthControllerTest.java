@@ -2,7 +2,7 @@ package friendy.community.domain.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.request.PasswordRequest;
+import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.service.AuthService;
@@ -183,41 +183,6 @@ class AuthControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
-    }
-
-    @Test
-    @DisplayName("비밀번호 변경이 완료되면 200 OK가 반환된다")
-    void resetPasswordSuccessfullyReturns200() throws Exception {
-        // Given
-        PasswordRequest passwordRequest = new PasswordRequest("example@friendy.com", "newPassword123!");
-
-        // When & Then
-        mockMvc.perform(post("/auth/password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(passwordRequest)))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("요청 이메일이 존재하지 않으면 401 UNAUTHORIZED를 반환한다")
-    void emailDosentExistReturns401() throws Exception {
-        // Given
-        PasswordRequest passwordRequest = new PasswordRequest("wrongEmail@friendy.com", "newPassword123!");
-
-        doThrow(new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."))
-                .when(authService)
-                .resetPassword(any(PasswordRequest.class));
-
-        // When & Then
-        mockMvc.perform(post("/auth/password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(passwordRequest)))
-                .andDo(print())
-                .andExpect(status().isUnauthorized())
-                .andExpect(result ->
-                        assertThat(result.getResolvedException().getMessage())
-                                .contains("해당 이메일의 회원이 존재하지 않습니다."));
     }
 
     @Test

@@ -1,15 +1,12 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.auth.dto.request.PasswordRequest;
+import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
-import friendy.community.domain.member.encryption.SaltGenerator;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.FriendyException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,35 +67,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("로그인에 실패하였습니다. 비밀번호를 확인해주세요.");
-    }
-
-    @Test
-    @DisplayName("비밀번호 변경 성공 시 해당 객체의 비밀번호가 변경된다")
-    void resetPasswordSuccessfullyPasswordIsChanged() {
-        // Given
-        Member savedMember = memberRepository.save(MemberFixture.memberFixture());
-        PasswordRequest request = new PasswordRequest(savedMember.getEmail(), "newPassword123!");
-        String originPassword = savedMember.getPassword();
-
-        // When
-        authService.resetPassword(request);
-        Member changedMember = authService.getMemberByEmail(savedMember.getEmail());
-
-        //Then
-        assertThat(originPassword).isNotEqualTo(changedMember.getPassword());
-    }
-
-    @Test
-    @DisplayName("요청받은 이메일이 존재하지 않으면 예외를 던진다")
-    void throwsExceptionWhenEmailDosentExists() {
-        // Given
-        Member savedMember = memberRepository.save(MemberFixture.memberFixture());
-        PasswordRequest request = new PasswordRequest("wrongEmail@friendy.com", "newPassword123!");
-
-        // When & Then
-        assertThatThrownBy(() -> authService.resetPassword(request))
-                .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("해당 이메일의 회원이 존재하지 않습니다.");
     }
 
     @Test
