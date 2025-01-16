@@ -7,6 +7,7 @@ import friendy.community.domain.member.service.MemberService;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +40,10 @@ class PostServiceTest {
     }
 
     @Test
-    void 테스트(){
+    @DisplayName("게시글이 성공적으로 생성되면 게시글 ID를 반환한다")
+    void createPostSuccessfullyReturnsPostId(){
+
+        //Given
         MockHttpServletRequest httpServletRequest = new MockHttpServletRequest();
         String token = "Bearer " + CORRECT_REFRESH_TOKEN;
         httpServletRequest.addHeader("Authorization", token);
@@ -47,8 +51,12 @@ class PostServiceTest {
         String content = "This is a new post content.";
         PostCreateRequest postCreateRequest = new PostCreateRequest(content);
 
+        //When
         Long postId = postService.savePost(postCreateRequest, httpServletRequest);
 
+        //Then
         assertThat(postId).isEqualTo(1L);
+
     }
+
 }
