@@ -1,6 +1,5 @@
 package friendy.community.domain.post.service;
 
-import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
@@ -10,16 +9,12 @@ import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
-
-import java.util.Objects;
-import java.util.Optional;
 
 import static friendy.community.domain.auth.fixtures.TokenFixtures.CORRECT_REFRESH_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
