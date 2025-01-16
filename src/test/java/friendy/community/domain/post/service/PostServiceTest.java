@@ -84,8 +84,8 @@ class PostServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> postService.savePost(postCreateRequest, httpServletRequest))
-            .isInstanceOf(FriendyException.class)  // 예외 타입이 FriendyException인지 확인
-            .hasMessageContaining("해당 이메일의 회원이 존재하지 않습니다.")  // 예외 메시지가 포함된 부분 검증
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED_EMAIL);  // errorCode 필드 검증
+            .isInstanceOf(FriendyException.class)
+            .hasMessageContaining("해당 이메일의 회원이 존재하지 않습니다.")
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED_EMAIL);
     }
 }
