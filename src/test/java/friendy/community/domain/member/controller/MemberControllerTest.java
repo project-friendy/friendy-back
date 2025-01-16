@@ -1,7 +1,9 @@
 package friendy.community.domain.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
+import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.member.service.MemberService;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,7 +38,12 @@ class MemberControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
+    private AuthService authService;
+
+    @MockitoBean
     private MemberService memberService;
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     @DisplayName("회원가입 요청이 성공적으로 처리되면 201 Created와 함께 응답을 반환한다")
@@ -233,4 +241,38 @@ class MemberControllerTest {
             .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("비밀번호 변경이 완료되면 200 OK가 반환된다")
+    void resetPasswordSuccessfullyReturns200() throws Exception {
+        // Given
+        PasswordRequest passwordRequest = new PasswordRequest("example@friendy.com", "newPassword123!");
+
+        // When & Then
+        mockMvc.perform(post("/auth/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(passwordRequest)))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("요청 이메일이 존재하지 않으면 401 UNAUTHORIZED를 반환한다")
+    void emailDosentExistReturns401() throws Exception {
+        // Given
+        PasswordRequest passwordRequest = new PasswordRequest("wrongEmail@friendy.com", "newPassword123!");
+
+        doThrow(new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."))
+                .when(memberService)
+                .resetPassword(any(PasswordRequest.class));
+
+        // When & Then
+        mockMvc.perform(post("/auth/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(passwordRequest)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(result ->
+                        assertThat(result.getResolvedException().getMessage())
+                                .contains("해당 이메일의 회원이 존재하지 않습니다."));
+    }
 }
