@@ -21,8 +21,7 @@ public class MemberService {
     private final MemberRepository  memberRepository;
     private final SaltGenerator saltGenerator;
     private final PasswordEncryptor passwordEncryptor;
-    public final AuthService authService;
-
+    private final AuthService authService;
 
     public Long signUp(MemberSignUpRequest request) {
         validateUniqueMemberAttributes(request);
