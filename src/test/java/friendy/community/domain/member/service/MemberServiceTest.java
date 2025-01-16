@@ -49,9 +49,9 @@ class MemberServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> memberService.assertUniqueEmail(savedMember.getEmail()))
-                .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("이미 가입된 이메일입니다.")
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
+            .isInstanceOf(FriendyException.class)
+            .hasMessageContaining("이미 가입된 이메일입니다.")
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_EMAIL);
     }
 
     @Test
@@ -62,9 +62,9 @@ class MemberServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> memberService.assertUniqueName(savedMember.getNickname()))
-                .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("닉네임이 이미 존재합니다.")
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_NICKNAME);
+            .isInstanceOf(FriendyException.class)
+            .hasMessageContaining("닉네임이 이미 존재합니다.")
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_NICKNAME);
     }
 
 }
