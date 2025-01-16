@@ -23,7 +23,7 @@ public class MemberController implements SpringDocMemberController{
         return ResponseEntity.created(URI.create("/users/" + memberService.signUp(request))).build();
     }
 
-    @PostMapping("/auth/password")
+    @PostMapping("/password")
     public ResponseEntity<Void> password(
             @Valid @RequestBody PasswordRequest passwordRequest
     ) {
