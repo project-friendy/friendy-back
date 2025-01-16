@@ -29,7 +29,7 @@ class PostTest {
 
     @Test
     @DisplayName("Post 객체가 생성되는지에 대한 test")
-    void testPostCreationWithBaseEntityFields() {
+    void ofMethodCreatesPostFromRequest() {
         // Given
         String content = "This is a new post content.";
         PostCreateRequest postCreateRequest = new PostCreateRequest(content);
