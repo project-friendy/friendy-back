@@ -8,10 +8,9 @@ import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,15 +38,15 @@ public class AuthService {
         return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
+    }
+
     private Member getVerifiedMember(String email, String password) {
         Member member = getMemberByEmail(email);
         validateCorrectPassword(member, password);
         return member;
-    }
-
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
     }
 
     private void validateCorrectPassword(Member member, String password) {
