@@ -248,7 +248,7 @@ class MemberControllerTest {
         PasswordRequest passwordRequest = new PasswordRequest("example@friendy.com", "newPassword123!");
 
         // When & Then
-        mockMvc.perform(post("/auth/password")
+        mockMvc.perform(post("/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(passwordRequest)))
                 .andDo(print())
@@ -266,7 +266,7 @@ class MemberControllerTest {
                 .resetPassword(any(PasswordRequest.class));
 
         // When & Then
-        mockMvc.perform(post("/auth/password")
+        mockMvc.perform(post("/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(passwordRequest)))
                 .andDo(print())
