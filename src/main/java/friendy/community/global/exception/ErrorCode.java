@@ -17,6 +17,8 @@ public enum ErrorCode {
     UNAUTHORIZED_EMAIL(1302, HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED_PASSWORD(1303, HttpStatus.UNAUTHORIZED),
 
+    POST_NOT_FOUND(1404, HttpStatus.NOT_FOUND),
+
     INTERNAL_SERVER_ERROR(2000, HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;

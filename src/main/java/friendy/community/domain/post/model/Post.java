@@ -3,6 +3,7 @@ package friendy.community.domain.post.model;
 import friendy.community.domain.common.BaseEntity;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
+import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,4 +36,7 @@ public class Post extends BaseEntity {
         return new Post(request, member);
     }
 
+    public void updatePost(final PostUpdateRequest postUpdateRequest) {
+        this.content = postUpdateRequest.content();
+    }
 }
