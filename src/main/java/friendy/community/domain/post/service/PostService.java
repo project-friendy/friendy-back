@@ -5,8 +5,11 @@ import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
+import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
+import friendy.community.global.exception.ErrorCode;
+import friendy.community.global.exception.FriendyException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,25 @@ public class PostService {
         final Member member = authService.getMemberByEmail(email);
 
         final Post post = Post.of(postCreateRequest, member);
+        postRepository.save(post);
+        return post.getId();
+    }
+
+    @Transactional
+    public long updatePost(final PostUpdateRequest postUpdateRequest,
+                           final HttpServletRequest httpServletRequest,final Long postId) {
+
+        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
+
+        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
+
+        final Member member = authService.getMemberByEmail(email);
+
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new FriendyException(ErrorCode.POST_NOT_FOUND,"존재하지 않는 게시글입니다"));
+
+        post.updatePost(postUpdateRequest);
+
         postRepository.save(post);
         return post.getId();
     }
