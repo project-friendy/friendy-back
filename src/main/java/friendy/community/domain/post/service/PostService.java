@@ -48,8 +48,9 @@ public class PostService {
 
         final Member member = authService.getMemberByEmail(email);
 
-        Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new FriendyException(ErrorCode.POST_NOT_FOUND,"존재하지 않는 게시글입니다"));
+        Post post = validatePostExistence(postId);
+
+        validatePostAuthor(member,post);
 
         post.updatePost(postUpdateRequest);
 
@@ -57,4 +58,14 @@ public class PostService {
         return post.getId();
     }
 
+    public Post validatePostExistence(Long postId) {
+        return postRepository.findById(postId)
+            .orElseThrow(() -> new FriendyException(ErrorCode.POST_NOT_FOUND, "존재하지 않는 게시글입니다"));
+    }
+
+    public void validatePostAuthor(Member member, Post post) {
+        if (!post.getMember().getId().equals(member.getId())) {
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_ACCESS, "작성자만 게시글을 수정할 수 있습니다.");
+        }
+    }
 }
