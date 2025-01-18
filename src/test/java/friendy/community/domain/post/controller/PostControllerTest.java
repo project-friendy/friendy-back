@@ -2,6 +2,7 @@ package friendy.community.domain.post.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
+import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -47,12 +49,7 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCreateRequest)))
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/posts/1"));
+        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isCreated()).andExpect(header().string("Location", "/posts/1"));
 
     }
 
@@ -67,11 +64,7 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCreateRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -85,11 +78,39 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCreateRequest)))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("포스트 수정 요청이 성공적으로 처리되면 200 OK와 함께 응답을 반환한다")
+    public void updatePostSuccessfullyReturns201Created() throws Exception {
+
+        //Given
+        Long postId = 1L;
+        PostUpdateRequest postUpdateRequest = new PostUpdateRequest("this is updated content");
+
+        //When
+        when(postService.updatePost(any(PostUpdateRequest.class), any(HttpServletRequest.class), anyLong())).thenReturn(1L);
+
+
+        //Then
+        mockMvc.perform(post("/posts/{postId}", postId).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postUpdateRequest))).andDo(print()).andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("포스트 수정에 content가 2200자가 넘어가면 400 Bad Request를 반환한다")
+    void updatePostWithContentExceedingMaxLengthReturns400BadRequest() throws Exception {
+
+        //Given
+        Long postId = 1L;
+        PostUpdateRequest postUpdateRequest = new PostUpdateRequest(generateLongContent(2300));
+
+        //When
+        when(postService.updatePost(any(PostUpdateRequest.class), any(HttpServletRequest.class), anyLong())).thenReturn(1L);
+
+        //Then
+        mockMvc.perform(post("/posts/{postId}", postId).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postUpdateRequest))).andDo(print()).andExpect(status().isBadRequest());
+    }
+
 
 }
