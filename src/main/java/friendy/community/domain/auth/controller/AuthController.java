@@ -19,7 +19,7 @@ public class AuthController implements SpringDocAuthController{
     private final AuthService authService;
     private final JwtTokenExtractor jwtTokenExtractor;
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<Void> login(
             @Valid @RequestBody LoginRequest loginRequest
     ) {
