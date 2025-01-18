@@ -1,6 +1,5 @@
 package friendy.community.domain.post.service;
 
-import com.querydsl.jpa.hibernate.HibernateDeleteClause;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
@@ -162,20 +161,19 @@ class PostServiceTest {
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(updateContent);
         postSetUp("This is content");
 
-
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-                "email2.friendy.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
+                "email2@friendy.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
         );
         memberService.signUp(memberSignUpRequest);
 
         httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("Authorization", "Bearer " +
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImVtYWlsMi5mcmllbmR5LmNvbSIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjo0ODU0Mjc4NDAwfQ.oljB25ve-TyrKcvbtTUoaFKkpQeVTwVwy1p1abH0IUU");
+                "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVtYWlsMkBmcmllbmR5LmNvbSIsImlhdCI6MTczNzE4OTc3NSwiZXhwIjoxNzM3MTkzMzc1fQ.peiTSH0DxDND2QZXeDVwaxklCGOFwiz-PAaznlRpq28");
 
         // When & Then
         assertThatThrownBy(() -> postService.updatePost(postUpdateRequest, httpServletRequest, 1L)) // 1L: 존재하는 게시글
                 .isInstanceOf(FriendyException.class) // 예외 타입 확인
-                .hasMessageContaining("게시글 작성자가 아닙니다") // 예외 메시지 확인
+                .hasMessageContaining("작성자만 게시글을 수정할 수 있습니다.") // 예외 메시지 확인
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS); // 에러 코드 확인
     }
 
