@@ -1,5 +1,6 @@
 package friendy.community.domain.post.service;
 
+import com.querydsl.jpa.hibernate.HibernateDeleteClause;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
@@ -11,6 +12,7 @@ import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @DirtiesContext
 class PostServiceTest {
 
+
+
     @Autowired
     private PostService postService;
 
@@ -41,6 +45,16 @@ class PostServiceTest {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+
+    public void clean() {
+        entityManager.createNativeQuery("ALTER TABLE post AUTO_INCREMENT = 1")
+                .executeUpdate();
+    }
+
 
     void signUpSetUp() {
         member = MemberFixture.memberFixture();
@@ -116,6 +130,7 @@ class PostServiceTest {
     void updatePostSuccessfullyReturnsPostId() {
 
         //Given
+        clean();
         MockHttpServletRequest httpServletRequest = new MockHttpServletRequest();
         String token = "Bearer " + CORRECT_REFRESH_TOKEN;
         httpServletRequest.addHeader("Authorization", token);
@@ -135,5 +150,26 @@ class PostServiceTest {
         //Then
         assertThat(postId).isEqualTo(1L);
         assertThat(post.getContent()).isEqualTo(updateContent);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시물을 수정하면 FriendyException을 던진다")
+    void throwsExceptionWhenPostNotFound() {
+        // Given
+
+        MockHttpServletRequest httpServletRequest = new MockHttpServletRequest();
+        String token = "Bearer " + CORRECT_REFRESH_TOKEN;
+        httpServletRequest.addHeader("Authorization", token);
+
+        String updateContent = "Update content";
+        PostUpdateRequest postUpdateRequest = new PostUpdateRequest(updateContent);
+
+        postSetUp();
+
+        // When & Then
+        assertThatThrownBy(() -> postService.updatePost(postUpdateRequest,httpServletRequest,999L))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("존재하지 않는 게시글입니다")
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.POST_NOT_FOUND);
     }
 }
