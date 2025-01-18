@@ -27,28 +27,19 @@ public class PostService {
 
     public long savePost(final PostCreateRequest postCreateRequest, final HttpServletRequest httpServletRequest) {
 
-        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
-
-        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
-
-        final Member member = authService.getMemberByEmail(email);
+        final Member member = getMemberFromRequest(httpServletRequest);
 
         final Post post = Post.of(postCreateRequest, member);
         postRepository.save(post);
         return post.getId();
     }
 
-    @Transactional
     public long updatePost(final PostUpdateRequest postUpdateRequest,
                            final HttpServletRequest httpServletRequest,final Long postId) {
 
-        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
+        final Member member = getMemberFromRequest(httpServletRequest);
 
-        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
-
-        final Member member = authService.getMemberByEmail(email);
-
-        Post post = validatePostExistence(postId);
+        final Post post = validatePostExistence(postId);
 
         validatePostAuthor(member,post);
 
@@ -58,14 +49,22 @@ public class PostService {
         return post.getId();
     }
 
-    public Post validatePostExistence(Long postId) {
+    private Post validatePostExistence(Long postId) {
         return postRepository.findById(postId)
-            .orElseThrow(() -> new FriendyException(ErrorCode.POST_NOT_FOUND, "존재하지 않는 게시글입니다"));
+            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다"));
     }
 
-    public void validatePostAuthor(Member member, Post post) {
+    private void validatePostAuthor(Member member, Post post) {
         if (!post.getMember().getId().equals(member.getId())) {
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_ACCESS, "작성자만 게시글을 수정할 수 있습니다.");
+            throw new FriendyException(ErrorCode.FORBIDDEN_ACCESS, "작성자만 게시글을 수정할 수 있습니다.");
         }
     }
+
+    private Member getMemberFromRequest(HttpServletRequest httpServletRequest) {
+        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
+        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
+        return authService.getMemberByEmail(email);
+    }
+
+
 }
