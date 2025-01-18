@@ -28,12 +28,12 @@ public class PostController implements SpringDocPostController {
     }
 
     @PostMapping("/{postId}")
-    public ResponseEntity<Void> modifyPost(
-        HttpServletRequest httpServletRequest,
-        @PathVariable Long postId,
-        @Valid @RequestBody PostUpdateRequest postUpdateRequest) {
+    public ResponseEntity<Void> updatePost(
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long postId,
+            @Valid @RequestBody PostUpdateRequest postUpdateRequest) {
 
-        long returnPostId = postService.updatePost(postUpdateRequest,httpServletRequest,postId);
+        Long returnPostId = postService.updatePost(postUpdateRequest, httpServletRequest, postId);
 
         return ResponseEntity.created(URI.create("/posts/" + returnPostId)).build();
 
