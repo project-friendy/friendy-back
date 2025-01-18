@@ -76,6 +76,24 @@ public class JwtTokenProvider {
         return extractedEmail;
     }
 
+    public long getExpirationFromAccessToken(final String token) {
+        validateAccessToken(token);
+        final Jws<Claims> claimsJws = getAccessTokenParser().parseClaimsJws(token);
+        final Date extractedDate = claimsJws.getBody().getExpiration();
+        final Date now = new Date();
+
+        return extractedDate.getTime() - now.getTime();
+    }
+
+    public long getExpirationFromRefreshToken(final String token) {
+        validateRefreshToken(token);
+        final Jws<Claims> claimsJws = getRefreshTokenParser().parseClaimsJws(token);
+        final Date extractedDate = claimsJws.getBody().getExpiration();
+        final Date now = new Date();
+
+        return extractedDate.getTime() - now.getTime();
+    }
+
     public void validateAccessToken(final String token) {
         try {
             final Claims claims = getAccessTokenParser().parseClaimsJws(token).getBody();
