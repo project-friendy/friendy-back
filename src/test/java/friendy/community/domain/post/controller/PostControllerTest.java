@@ -41,7 +41,6 @@ class PostControllerTest {
     @Test
     @DisplayName("포스트 생성 요청이 성공적으로 처리되면 201 Created와 함께 응답을 반환한다")
     public void createPostSuccessfullyReturns201Created() throws Exception {
-
         //Given
         PostCreateRequest postCreateRequest = new PostCreateRequest("this is new content");
 
@@ -56,7 +55,6 @@ class PostControllerTest {
     @Test
     @DisplayName("포스트 생성에 content가 없으면 400 Bad Request를 반환한다")
     void createPostWithoutContentReturns400BadRequest() throws Exception {
-
         //Given
         PostCreateRequest postCreateRequest = new PostCreateRequest(null);
 
@@ -70,7 +68,6 @@ class PostControllerTest {
     @Test
     @DisplayName("content가 2200자가 넘어가면 400 Bad Request를 반환한다")
     void createPostWithContentExceedingMaxLengthReturns400BadRequest() throws Exception {
-
         //Given
         PostCreateRequest postCreateRequest = new PostCreateRequest(generateLongContent(2300));
 
@@ -84,7 +81,6 @@ class PostControllerTest {
     @Test
     @DisplayName("포스트 수정 요청이 성공적으로 처리되면 200 OK와 함께 응답을 반환한다")
     public void updatePostSuccessfullyReturns201Created() throws Exception {
-
         //Given
         Long postId = 1L;
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest("this is updated content");
@@ -100,7 +96,6 @@ class PostControllerTest {
     @Test
     @DisplayName("포스트 수정에 content가 2200자가 넘어가면 400 Bad Request를 반환한다")
     void updatePostWithContentExceedingMaxLengthReturns400BadRequest() throws Exception {
-
         //Given
         Long postId = 1L;
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(generateLongContent(2300));

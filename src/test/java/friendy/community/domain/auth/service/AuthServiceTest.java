@@ -1,7 +1,6 @@
 package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
-import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;

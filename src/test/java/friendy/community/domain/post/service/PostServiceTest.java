@@ -23,7 +23,8 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
 
-import static friendy.community.domain.auth.fixtures.TokenFixtures.CORRECT_REFRESH_TOKEN;
+import static friendy.community.domain.auth.fixtures.TokenFixtures.CORRECT_ACCESS_TOKEN;
+import static friendy.community.domain.auth.fixtures.TokenFixtures.OTHER_USER_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
@@ -53,9 +54,8 @@ class PostServiceTest {
 
     @BeforeEach
     void setup() {
-
         httpServletRequest = new MockHttpServletRequest();
-        httpServletRequest.addHeader("Authorization", "Bearer " + CORRECT_REFRESH_TOKEN);
+        httpServletRequest.addHeader("Authorization", CORRECT_ACCESS_TOKEN);
 
         member = MemberFixture.memberFixture();
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
@@ -71,18 +71,14 @@ class PostServiceTest {
                 .executeUpdate();
     }
 
-
     private void postSetUp(String content) {
-
         PostCreateRequest postCreateRequest = new PostCreateRequest(content);
         Long postId = postService.savePost(postCreateRequest, httpServletRequest);
     }
 
-
     @Test
     @DisplayName("게시글이 성공적으로 생성되면 게시글 ID를 반환한다")
     void createPostSuccessfullyReturnsPostId() {
-
         //Given
         String content = "This is a new post content.";
         PostCreateRequest postCreateRequest = new PostCreateRequest(content);
@@ -99,15 +95,9 @@ class PostServiceTest {
     @DisplayName("이메일이 존재하지 않으면 FriendyException 던진다")
     void throwsExceptionWhenEmailNotFound() {
         // Given
-
         memberRepository.deleteAll();
         String content = "This is a new post content.";
         PostCreateRequest postCreateRequest = new PostCreateRequest(content);
-
-        member = MemberFixture.memberFixture();
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("nonemali.friendy.com", member.getNickname(), member.getPassword(), member.getBirthDate());
-
-        memberService.signUp(memberSignUpRequest);
 
         // When & Then
         assertThatThrownBy(() -> postService.savePost(postCreateRequest, httpServletRequest))
@@ -119,7 +109,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글이 성공적으로 수정되면 게시글 id를 반환한다")
     void updatePostSuccessfullyReturnsPostId() {
-
         //Given
         String updateContent = "Update content";
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(updateContent);
@@ -162,13 +151,12 @@ class PostServiceTest {
         postSetUp("This is content");
 
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-                "email2@friendy.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
+                "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
         );
         memberService.signUp(memberSignUpRequest);
 
         httpServletRequest = new MockHttpServletRequest();
-        httpServletRequest.addHeader("Authorization", "Bearer " +
-                "eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImVtYWlsMkBmcmllbmR5LmNvbSIsImlhdCI6MTczNzE4OTc3NSwiZXhwIjoxNzM3MTkzMzc1fQ.peiTSH0DxDND2QZXeDVwaxklCGOFwiz-PAaznlRpq28");
+        httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
 
         // When & Then
         assertThatThrownBy(() -> postService.updatePost(postUpdateRequest, httpServletRequest, 1L)) // 1L: 존재하는 게시글
