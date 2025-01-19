@@ -1,10 +1,13 @@
 package friendy.community.domain.auth.jwt;
 
 import friendy.community.global.exception.FriendyException;
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Date;
 
 import static friendy.community.domain.auth.fixtures.TokenFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +30,40 @@ class JwtTokenProviderTest {
 
         // then
         assertThat(accessToken).isNotNull();
+    }
+
+    @Test
+    @DisplayName("액세스 토큰에서 만료까지 남은 시간을 반환한다.")
+    void getExpirationFromAceessTokenSuccessfully() {
+        // given
+        String email = "example@friendy.com";
+        String accessToken = jwtTokenProvider.generateAccessToken(email);
+
+        Date now = new Date();
+        long expireTime = 3600000L;
+
+        // when
+        long extractedTime = jwtTokenProvider.getExpirationFromAccessToken(accessToken);
+
+        // then
+        assertThat(extractedTime).isCloseTo(expireTime, Percentage.withPercentage(1));
+    }
+
+    @Test
+    @DisplayName("리프레시 토큰에서 만료까지 남은 시간을 반환한다.")
+    void getExpirationFromRefreshTokenSuccessfully() {
+        // given
+        String email = "example@friendy.com";
+        String refreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        Date now = new Date();
+        long expireTime = 2592000000L;
+
+        // when
+        long extractedTime = jwtTokenProvider.getExpirationFromRefreshToken(refreshToken);
+
+        // then
+        assertThat(extractedTime).isCloseTo(expireTime, Percentage.withPercentage(1));
     }
 
     @Test
