@@ -11,11 +11,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static friendy.community.domain.auth.fixtures.TokenFixtures.CORRECT_REFRESH_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -28,9 +33,16 @@ class AuthServiceTest {
     @Autowired
     MemberRepository memberRepository;
 
+    @MockitoBean
+    private StringRedisTemplate redisTemplate;
+
     @Test
     @DisplayName("로그인 성공 시 액세스 토큰과 리프레시 토큰이 생성된다.")
     void loginSuccessfullyGeneratesTokens() {
+        // Redis Mock 셋업
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
         // Given
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         LoginRequest loginRequest = new LoginRequest(savedMember.getEmail(), MemberFixture.getFixturePlainPassword());
@@ -71,6 +83,10 @@ class AuthServiceTest {
     @Test
     @DisplayName("토큰 재발급 성공 시 새로운 액세스 토큰과 리프레시 토큰이 반환된다.")
     void reissueTokenSuccessfullyReturnsNewTokens() {
+        // Redis Mock 셋업
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
         // Given
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         String refreshToken = CORRECT_REFRESH_TOKEN;
