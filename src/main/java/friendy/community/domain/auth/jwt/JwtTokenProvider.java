@@ -3,9 +3,12 @@ package friendy.community.domain.auth.jwt;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -14,6 +17,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private final String EMAIL_KEY = "email";
@@ -28,7 +32,7 @@ public class JwtTokenProvider {
     @Value("${jwt.refresh.expiration}")
     private long jwtRefreshTokenExpirationInMs;
 
-    private RedisTemplate<String, String> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     public String generateAccessToken(final String email) {
         final Date now = new Date();
@@ -55,11 +59,7 @@ public class JwtTokenProvider {
                 .signWith(secretKey)
                 .compact();
 
-        saveTokenExpiration(
-                email,
-                generatedToken,
-                expiryDate.getTime() - now.getTime()
-        );
+        saveTokenExpiration(email, generatedToken);
 
         return generatedToken;
 
@@ -125,15 +125,11 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    private void saveTokenExpiration(
-            final String email,
-            final String refreshToken,
-            final long tokenExpiration
-    ) {
+    private void saveTokenExpiration(final String email, final String refreshToken) {
         redisTemplate.opsForValue().set(
                 email,
                 refreshToken,
-                tokenExpiration,
+                jwtRefreshTokenExpirationInMs,
                 TimeUnit.MILLISECONDS
         );
     }
