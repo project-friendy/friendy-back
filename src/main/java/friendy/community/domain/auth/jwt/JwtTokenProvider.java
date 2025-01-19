@@ -4,12 +4,14 @@ import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtTokenProvider {
@@ -25,6 +27,8 @@ public class JwtTokenProvider {
     private String jwtRefreshTokenSecret;
     @Value("${jwt.refresh.expiration}")
     private long jwtRefreshTokenExpirationInMs;
+
+    private RedisTemplate<String, String> redisTemplate;
 
     public String generateAccessToken(final String email) {
         final Date now = new Date();
@@ -44,12 +48,21 @@ public class JwtTokenProvider {
         final Date expiryDate = new Date(now.getTime() + jwtRefreshTokenExpirationInMs);
         final SecretKey secretKey = new SecretKeySpec(jwtRefreshTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
 
-        return Jwts.builder()
+        final String generatedToken = Jwts.builder()
                 .claim(EMAIL_KEY, email)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(secretKey)
                 .compact();
+
+        saveTokenExpiration(
+                email,
+                generatedToken,
+                expiryDate.getTime() - now.getTime()
+        );
+
+        return generatedToken;
+
     }
 
     public String extractEmailFromAccessToken(final String token) {
@@ -74,24 +87,6 @@ public class JwtTokenProvider {
         }
 
         return extractedEmail;
-    }
-
-    public long getExpirationFromAccessToken(final String token) {
-        validateAccessToken(token);
-        final Jws<Claims> claimsJws = getAccessTokenParser().parseClaimsJws(token);
-        final Date extractedDate = claimsJws.getBody().getExpiration();
-        final Date now = new Date();
-
-        return extractedDate.getTime() - now.getTime();
-    }
-
-    public long getExpirationFromRefreshToken(final String token) {
-        validateRefreshToken(token);
-        final Jws<Claims> claimsJws = getRefreshTokenParser().parseClaimsJws(token);
-        final Date extractedDate = claimsJws.getBody().getExpiration();
-        final Date now = new Date();
-
-        return extractedDate.getTime() - now.getTime();
     }
 
     public void validateAccessToken(final String token) {
@@ -128,6 +123,19 @@ public class JwtTokenProvider {
         return Jwts.parserBuilder()
                 .setSigningKey(jwtRefreshTokenSecret.getBytes(StandardCharsets.UTF_8))
                 .build();
+    }
+
+    private void saveTokenExpiration(
+            final String email,
+            final String refreshToken,
+            final long tokenExpiration
+    ) {
+        redisTemplate.opsForValue().set(
+                email,
+                refreshToken,
+                tokenExpiration,
+                TimeUnit.MILLISECONDS
+        );
     }
 
 }
