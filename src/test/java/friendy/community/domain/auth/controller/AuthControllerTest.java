@@ -57,7 +57,7 @@ class AuthControllerTest {
         when(authService.login(any(LoginRequest.class))).thenReturn(loginResponse);
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(loginRequest)))
                 .andDo(print())
@@ -76,7 +76,7 @@ class AuthControllerTest {
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
@@ -95,7 +95,7 @@ class AuthControllerTest {
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_PASSWORD, "로그인에 실패하였습니다. 비밀번호를 확인해주세요."));
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
@@ -111,7 +111,7 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest(null, "password123!");
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andDo(print())
@@ -125,7 +125,7 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest("invalid-email", "password123!");
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andDo(print())
@@ -139,7 +139,7 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest("example@friendy.com", null);
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andDo(print())
@@ -158,7 +158,7 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest(email, password);
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andDo(print())
@@ -177,7 +177,7 @@ class AuthControllerTest {
         LoginRequest request = new LoginRequest(email, password);
 
         // When & Then
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(request)))
                 .andDo(print())
