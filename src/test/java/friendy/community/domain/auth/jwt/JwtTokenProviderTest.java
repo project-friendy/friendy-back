@@ -2,22 +2,30 @@ package friendy.community.domain.auth.jwt;
 
 import friendy.community.global.exception.FriendyException;
 import org.assertj.core.data.Percentage;
+import org.hamcrest.number.IsCloseTo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static friendy.community.domain.auth.fixtures.TokenFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class JwtTokenProviderTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @MockitoBean
+    private StringRedisTemplate redisTemplate;
 
     @Test
     @DisplayName("엑세스 토큰 생성에 성공한다")
@@ -83,21 +91,35 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    @DisplayName("리프레시 토큰 생성에 성공한다")
-    void generateRefreshTokenSuccessfully() {
+    @DisplayName("리프레시 토큰 생성에 성공하면 redis에 토큰이 저장된다.")
+    void generateRefreshTokenSuccessfullyStoresRefreshToken() {
         // given
         String email = "example@friendy.com";
+
+        // Redis Mock 설정
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
 
         // then
         assertThat(refreshToken).isNotNull();
+        verify(valueOperations, times(1)).set(
+                eq(email),
+                eq(refreshToken),
+                anyLong(),
+                eq(TimeUnit.MILLISECONDS)
+        );
     }
 
     @Test
     @DisplayName("리프레시 토큰에서 이메일을 추출한다")
     void extractEmailFromRefreshTokenSuccessfully() {
+        // Redis Mock 설정
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
         // given
         String email = "example@friendy.com";
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
