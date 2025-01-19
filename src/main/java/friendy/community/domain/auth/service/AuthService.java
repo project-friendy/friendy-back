@@ -8,14 +8,9 @@ import friendy.community.domain.member.model.Member;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
-import io.netty.util.Timeout;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +21,11 @@ public class AuthService {
     private final PasswordEncryptor passwordEncryptor;
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final RedisTemplate<String, String> redisTemplate;
-
     public TokenResponse login(final LoginRequest request) {
         final Member member = getVerifiedMember(request.email(), request.password());
 
         final String accessToken = jwtTokenProvider.generateAccessToken(request.email());
         final String refreshToken = jwtTokenProvider.generateRefreshToken(request.email());
-        final long refreshTokenExpiration = jwtTokenProvider.getExpirationFromRefreshToken(refreshToken);
-
-        redisTemplate.opsForValue().set(member.getEmail(), refreshToken, refreshTokenExpiration, TimeUnit.MILLISECONDS);
 
         return TokenResponse.of(accessToken, refreshToken);
     }
