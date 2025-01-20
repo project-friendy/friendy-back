@@ -57,12 +57,10 @@ public class SwaggerConfig {
 
     private SecurityScheme generateAccessTokenScheme() {
         return new SecurityScheme()
-                .type(Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
+                .type(Type.APIKEY)
                 .in(In.HEADER)
                 .name("Authorization")
-                .description("Bearer Access Token");
+                .description("Access Token");
     }
 
     private SecurityScheme generateRefreshTokenScheme() {
