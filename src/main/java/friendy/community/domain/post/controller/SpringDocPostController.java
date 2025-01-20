@@ -20,7 +20,7 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 생성", description = "새 게시글을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "게시글 생성 성공")
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts", errorCases = {
-        @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용을 입력해주세요.")
+            @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용이 입력되지 않았습니다.")
     })
     @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/posts", errorCases = {
             @ErrorCase(description = "액세스 토큰 추출 실패", exampleMessage = "인증 실패(액세스 토큰 추출 실패) - 토큰 : {token}"),
@@ -35,10 +35,10 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 수정", description = "기존 게시글을 수정합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 수정 성공")
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts/{postId}", errorCases = {
-        @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용을 입력해주세요.")
+        @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용이 입력되지 않았습니다.")
     })
     @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/{postId}", errorCases = {
-            @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "해당 게시글이 존재하지 않습니다.")
+            @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다.")
     })
     @ApiErrorResponse(status = HttpStatus.FORBIDDEN, instance = "/posts/{postId}", errorCases = {
             @ErrorCase(description = "작성자가 아닌 사용자가 수정 시도", exampleMessage = "게시글은 작성자 본인만 관리할 수 있습니다.")
@@ -57,7 +57,7 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 삭제", description = "기존 게시글을 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 삭제 성공")
     @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/{postId}", errorCases = {
-            @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "해당 게시글이 존재하지 않습니다.")
+            @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다.")
     })
     @ApiErrorResponse(status = HttpStatus.FORBIDDEN, instance = "/posts/{postId}", errorCases = {
             @ErrorCase(description = "작성자가 아닌 사용자가 삭제 시도", exampleMessage = "게시글은 작성자 본인만 관리할 수 있습니다.")
