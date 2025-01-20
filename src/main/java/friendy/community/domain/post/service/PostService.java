@@ -49,6 +49,18 @@ public class PostService {
         return post.getId();
     }
 
+    public void deletePost(final HttpServletRequest httpServletRequest, final Long postId) {
+
+        final Member member = getMemberFromRequest(httpServletRequest);
+
+        final Post post = validatePostExistence(postId);
+
+        validatePostAuthor(member,post);
+
+        postRepository.delete(post);
+
+    }
+
     private Post validatePostExistence(Long postId) {
         return postRepository.findById(postId)
             .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다"));
@@ -56,7 +68,7 @@ public class PostService {
 
     private void validatePostAuthor(Member member, Post post) {
         if (!post.getMember().getId().equals(member.getId())) {
-            throw new FriendyException(ErrorCode.FORBIDDEN_ACCESS, "작성자만 게시글을 수정할 수 있습니다.");
+            throw new FriendyException(ErrorCode.FORBIDDEN_ACCESS, "게시글은 작성자 본인만 관리할 수 있습니다.");
         }
     }
 
