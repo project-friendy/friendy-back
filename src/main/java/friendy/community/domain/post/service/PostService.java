@@ -63,7 +63,7 @@ public class PostService {
 
     private Post validatePostExistence(Long postId) {
         return postRepository.findById(postId)
-            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다"));
+            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다."));
     }
 
     private void validatePostAuthor(Member member, Post post) {
