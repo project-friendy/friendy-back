@@ -20,8 +20,9 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 생성", description = "새 게시글을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "게시글 생성 성공")
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts", errorCases = {
-            @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용을 입력해주세요."),
-            @ErrorCase(description = "Access Token 형식 오류", exampleMessage = "유효한 Access Token을 입력해주세요.")
+        @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용을 입력해주세요."),
+        @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}")
+
 
     })
     ResponseEntity<Void> createPost(
@@ -35,7 +36,8 @@ public interface SpringDocPostController {
         @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용을 입력해주세요."),
         @ErrorCase(description = "작성자가 아닌 사용자가 수정 시도", exampleMessage = "게시글은 작성자 본인만 관리할 수 있습니다."),
         @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "해당 게시글이 존재하지 않습니다."),
-        @ErrorCase(description = "Access Token 형식 오류", exampleMessage = "유효한 Access Token을 입력해주세요.")
+        @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}")
+
 
     })
     ResponseEntity<Void> updatePost(
@@ -49,7 +51,8 @@ public interface SpringDocPostController {
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts/{postId}", errorCases = {
         @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다."),
         @ErrorCase(description = "작성자가 아닌 사용자가 삭제 시도", exampleMessage = "게시글은 작성자 본인만 관리할 수 있습니다."),
-        @ErrorCase(description = "Access Token 형식 오류", exampleMessage = "유효한 Access Token을 입력해주세요.")
+        @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}")
+
 
     })
     ResponseEntity<Void> deletePost(
