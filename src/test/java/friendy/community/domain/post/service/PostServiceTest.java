@@ -128,7 +128,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 게시물을 수정하면 FriendyException을 던진다")
-    void throwsExceptionWhenPostNotFound() {
+    void throwsExceptionWhenPostNotFoundOnUpdate() {
         // Given
         String updateContent = "Update content";
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(updateContent);
@@ -144,7 +144,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("게시글 작성자가 아닌 사용자가 수정하면 FriendyException을 던진다")
-    void throwsExceptionWhenNotPostAuthor() {
+    void throwsExceptionWhenNotPostAuthorOnUpdate() {
         // Given
         String updateContent = "Update content";
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest(updateContent);
@@ -159,10 +159,58 @@ class PostServiceTest {
         httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
 
         // When & Then
-        assertThatThrownBy(() -> postService.updatePost(postUpdateRequest, httpServletRequest, 1L)) // 1L: 존재하는 게시글
-                .isInstanceOf(FriendyException.class) // 예외 타입 확인
-                .hasMessageContaining("작성자만 게시글을 수정할 수 있습니다.") // 예외 메시지 확인
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS); // 에러 코드 확인
+        assertThatThrownBy(() -> postService.updatePost(postUpdateRequest, httpServletRequest, 1L))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("게시글은 작성자 본인만 관리할 수 있습니다.")
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
     }
 
+    @Test
+    @DisplayName("게시글이 성공적으로 삭제되면 해당 게시글이 삭제된다")
+    void deletePostSuccessfullyDeletesPost() {
+        // Given
+        postSetUp("This is content");
+        Post post = postRepository.findById(1L)
+            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다"));
+
+        // When
+        postService.deletePost(httpServletRequest, post.getId());
+
+        // Then
+        assertThat(postRepository.existsById(post.getId())).isFalse();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시물을 삭제하면 FriendyException을 던진다")
+    void throwsExceptionWhenPostNotFoundOnDelete() {
+        // Given
+        Long nonExistentPostId = 999L;
+
+        // When & Then
+        assertThatThrownBy(() -> postService.deletePost(httpServletRequest, nonExistentPostId))
+            .isInstanceOf(FriendyException.class)
+            .hasMessageContaining("존재하지 않는 게시글입니다")
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("게시글 작성자가 아닌 사용자가 삭제하면 FriendyException을 던진다")
+    void throwsExceptionWhenNotPostAuthorOnDelete() {
+        // Given
+        postSetUp("This is content");
+
+        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
+            "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
+        );
+        memberService.signUp(memberSignUpRequest);
+
+        httpServletRequest = new MockHttpServletRequest();
+        httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
+
+        // When & Then
+        assertThatThrownBy(() -> postService.deletePost(httpServletRequest, 1L))
+            .isInstanceOf(FriendyException.class)
+            .hasMessageContaining("게시글은 작성자 본인만 관리할 수 있습니다.")
+            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+    }
 }

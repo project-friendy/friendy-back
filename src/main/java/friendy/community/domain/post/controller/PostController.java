@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 
 @RestController
@@ -37,6 +36,16 @@ public class PostController implements SpringDocPostController {
 
         return ResponseEntity.created(URI.create("/posts/" + returnPostId)).build();
 
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(
+        HttpServletRequest httpServletRequest,
+        @PathVariable Long postId) {
+
+        postService.deletePost(httpServletRequest, postId);
+
+        return ResponseEntity.ok().build();
     }
 
 }
