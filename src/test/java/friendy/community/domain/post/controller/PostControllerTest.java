@@ -13,9 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -48,7 +49,11 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isCreated()).andExpect(header().string("Location", "/posts/1"));
+        mockMvc.perform(post("/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(postCreateRequest)))
+            .andDo(print()).andExpect(status().isCreated())
+            .andExpect(header().string("Location", "/posts/1"));
 
     }
 
@@ -62,7 +67,10 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(postCreateRequest)))
+            .andDo(print()).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -75,11 +83,14 @@ class PostControllerTest {
         when(postService.savePost(any(PostCreateRequest.class), any(HttpServletRequest.class))).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postCreateRequest))).andDo(print()).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/posts")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(postCreateRequest)))
+            .andDo(print()).andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("포스트 수정 요청이 성공적으로 처리되면 200 OK와 함께 응답을 반환한다")
+    @DisplayName("포스트 수정 요청이 성공적으로 처리되면 201 Created와 함께 응답을 반환한다")
     public void updatePostSuccessfullyReturns201Created() throws Exception {
         //Given
         Long postId = 1L;
@@ -90,7 +101,10 @@ class PostControllerTest {
 
 
         //Then
-        mockMvc.perform(post("/posts/{postId}", postId).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postUpdateRequest))).andDo(print()).andExpect(status().isCreated());
+        mockMvc.perform(post("/posts/{postId}", postId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(postUpdateRequest)))
+            .andDo(print()).andExpect(status().isCreated());
     }
 
     @Test
@@ -104,8 +118,24 @@ class PostControllerTest {
         when(postService.updatePost(any(PostUpdateRequest.class), any(HttpServletRequest.class), anyLong())).thenReturn(1L);
 
         //Then
-        mockMvc.perform(post("/posts/{postId}", postId).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(postUpdateRequest))).andDo(print()).andExpect(status().isBadRequest());
+        mockMvc.perform(post("/posts/{postId}", postId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(postUpdateRequest)))
+            .andDo(print()).andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("포스트 삭제 요청이 성공적으로 처리되면 200 OK와 함께 응답을 반환한다")
+    public void deletePostSuccessfullyReturns200Ok() throws Exception {
+        //Given
+        Long postId = 1L;
 
+        //When
+        doNothing().when(postService).deletePost(any(HttpServletRequest.class), eq(postId)); // 서비스 메서드가 아무 동작도 하지 않도록 설정
+
+        //Then
+        mockMvc.perform(delete("/posts/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }
