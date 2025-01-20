@@ -42,8 +42,8 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 삭제", description = "기존 게시글을 삭제합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 삭제 성공")
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts/{postId}", errorCases = {
-        @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "해당 게시글이 존재하지 않습니다."),
-        @ErrorCase(description = "작성자가 아닌 사용자가 삭제 시도", exampleMessage = "게시글은 작성자만 삭제할 수 있습니다.")
+        @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다."),
+        @ErrorCase(description = "작성자가 아닌 사용자가 삭제 시도", exampleMessage = "게시글은 작성자 본인만 관리할 수 있습니다.")
     })
     ResponseEntity<Void> deletePost(
         HttpServletRequest httpServletRequest,

@@ -116,7 +116,7 @@ class PostServiceTest {
         postSetUp("This is content");
 
         Post post = postRepository.findById(1L)
-            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다"));
+            .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다."));
 
         //When
         Long postId = postService.updatePost(postUpdateRequest, httpServletRequest ,1L);
@@ -138,7 +138,7 @@ class PostServiceTest {
         // When & Then
         assertThatThrownBy(() -> postService.updatePost(postUpdateRequest,httpServletRequest,999L))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("존재하지 않는 게시글입니다")
+                .hasMessageContaining("존재하지 않는 게시글입니다.")
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
     }
 
@@ -189,7 +189,7 @@ class PostServiceTest {
         // When & Then
         assertThatThrownBy(() -> postService.deletePost(httpServletRequest, nonExistentPostId))
             .isInstanceOf(FriendyException.class)
-            .hasMessageContaining("존재하지 않는 게시글입니다")
+            .hasMessageContaining("존재하지 않는 게시글입니다.")
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
     }
 
