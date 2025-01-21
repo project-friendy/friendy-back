@@ -5,10 +5,8 @@ import friendy.community.global.exception.FriendyException;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -43,7 +41,7 @@ public class JwtTokenProvider {
         final SecretKey secretKey = new SecretKeySpec(jwtRefreshTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
         final String generatedToken = buildJwtToken(email, jwtRefreshTokenExpirationInMs, secretKey);
 
-        saveTokenExpiration(email, generatedToken);
+        saveRefreshToken(email, generatedToken);
 
         return generatedToken;
 
@@ -121,13 +119,20 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    private void saveTokenExpiration(final String email, final String refreshToken) {
+    private void saveRefreshToken(final String email, final String refreshToken) {
         redisTemplate.opsForValue().set(
                 email,
                 refreshToken,
                 jwtRefreshTokenExpirationInMs,
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    public void deleteRefreshToken(final String email) {
+        if (redisTemplate.hasKey(email))
+            redisTemplate.delete(email);
+        else
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 되어있지 않은 사용자입니다.");
     }
 
 }
