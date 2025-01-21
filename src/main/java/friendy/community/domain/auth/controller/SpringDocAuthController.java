@@ -23,18 +23,33 @@ public interface SpringDocAuthController {
                     @Header(name = "Authorization-Refresh", description = "리프레시 토큰", required = true, schema = @Schema(type = "string"))
             }
     )
-    @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/login", errorCases = {
+    @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/auth/login", errorCases = {
             @ErrorCase(description = "이메일 입력 없음", exampleMessage = "이메일이 입력되지 않았습니다."),
             @ErrorCase(description = "이메일 형식 오류", exampleMessage = "이메일 형식으로 입력해주세요."),
             @ErrorCase(description = "비밀번호 입력 없음", exampleMessage = "비밀번호가 입력되지 않았습니다."),
             @ErrorCase(description = "비밀번호 형식 오류", exampleMessage = "숫자, 영문자, 특수문자(~!@#$%^&*?)를 포함해야 합니다."),
             @ErrorCase(description = "비밀번호 글자수 오류", exampleMessage = "비밀번호는 8~16자 사이로 입력해주세요."),
     })
-    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/login", errorCases = {
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/auth/login", errorCases = {
             @ErrorCase(description = "이메일 불일치", exampleMessage = "해당 이메일의 회원이 존재하지 않습니다."),
             @ErrorCase(description = "비밀번호 불일치", exampleMessage = "로그인에 실패하였습니다. 비밀번호를 확인해주세요."),
     })
     ResponseEntity<Void> login(LoginRequest request);
+
+    @Operation(
+            summary = "로그아웃",
+            security = {
+                    @SecurityRequirement(name = "bearerAuth"),
+                    @SecurityRequirement(name = "refreshAuth")
+            }
+    )
+    @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/auth/logout", errorCases = {
+            @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : {token}")
+    })
+    ResponseEntity<Void> logout(HttpServletRequest httpServletRequest);
 
     @Operation(
             summary = "토큰 재발급",
@@ -49,7 +64,7 @@ public interface SpringDocAuthController {
                     @Header(name = "Authorization-Refresh", description = "새로운 리프레시 토큰", required = true, schema = @Schema(type = "string"))
             }
     )
-    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/token/reissue", errorCases = {
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/auth/token/reissue", errorCases = {
             @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}"),
             @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : {token}"),
             @ErrorCase(description = "리프레시 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : {token}")
