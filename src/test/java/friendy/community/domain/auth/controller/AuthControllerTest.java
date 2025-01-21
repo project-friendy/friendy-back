@@ -200,7 +200,7 @@ class AuthControllerTest {
         when(authService.reissueToken("refreshToken")).thenReturn(tokenResponse);
 
         // When & Then
-        mockMvc.perform(post("/token/reissue")
+        mockMvc.perform(post("/auth/token/reissue")
                         .header("Authorization-Refresh", refreshToken))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -223,7 +223,7 @@ class AuthControllerTest {
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(잘못된 리프레시 토큰) - 토큰 : invalidRefreshToken"));
 
         // When & Then
-        mockMvc.perform(post("/token/reissue")
+        mockMvc.perform(post("/auth/token/reissue")
                         .header("Authorization-Refresh", refreshToken))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
@@ -244,7 +244,7 @@ class AuthControllerTest {
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(만료된 리프레시 토큰) - 토큰 : expiredRefreshToken"));
 
         // When & Then
-        mockMvc.perform(post("/token/reissue")
+        mockMvc.perform(post("/auth/token/reissue")
                         .header("Authorization-Refresh", refreshToken))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
@@ -265,7 +265,7 @@ class AuthControllerTest {
                 .thenThrow(new FriendyException(ErrorCode.UNAUTHORIZED_USER, "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
 
         // When & Then
-        mockMvc.perform(post("/token/reissue")
+        mockMvc.perform(post("/auth/token/reissue")
                         .header("Authorization-Refresh", refreshToken))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
