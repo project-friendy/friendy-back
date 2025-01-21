@@ -34,7 +34,7 @@ public class AuthController implements SpringDocAuthController{
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Object> logout(
+    public ResponseEntity<Void> logout(
         HttpServletRequest httpServletRequest
     ) {
         final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
