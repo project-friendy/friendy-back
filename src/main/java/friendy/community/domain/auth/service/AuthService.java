@@ -30,10 +30,11 @@ public class AuthService {
         return TokenResponse.of(accessToken, refreshToken);
     }
 
-    public void logout(final String accessToken) {
-        jwtTokenProvider.validateAccessToken(accessToken);
-        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
-        final Member member = getMemberByEmail(email);
+    public void logout(final String refreshToken) {
+        jwtTokenProvider.validateRefreshToken(refreshToken);
+        final String email = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
+
+        jwtTokenProvider.deleteRefreshToken(email);
     }
 
     public TokenResponse reissueToken(final String refreshToken) {
