@@ -84,6 +84,10 @@ public class JwtTokenProvider {
     }
 
     public void validateRefreshToken(final String token) {
+        if (!redisTemplate.hasKey(extractEmailFromRefreshToken(token))) {
+            final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
+        }
         try {
             final Claims claims = getRefreshTokenParser().parseClaimsJws(token).getBody();
         } catch (MalformedJwtException | UnsupportedJwtException e) {
