@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class JwtTokenProvider {
 
     private final String EMAIL_KEY = "email";
+    private final String ACCESS_TOKEN = "access";
+    private final String REFRESH_TOKEN = "refresh";
 
     @Value("${jwt.access.secret}")
     private String jwtAccessTokenSecret;
@@ -35,29 +37,11 @@ public class JwtTokenProvider {
     private final StringRedisTemplate redisTemplate;
 
     public String generateAccessToken(final String email) {
-        final Date now = new Date();
-        final Date expiryDate = new Date(now.getTime() + jwtAccessTokenExpirationInMs);
-        final SecretKey secretKey = new SecretKeySpec(jwtAccessTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
-
-        return Jwts.builder()
-                .claim(EMAIL_KEY, email)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(secretKey)
-                .compact();
+        return buildJwtToken(email, ACCESS_TOKEN);
     }
 
     public String generateRefreshToken(final String email) {
-        final Date now = new Date();
-        final Date expiryDate = new Date(now.getTime() + jwtRefreshTokenExpirationInMs);
-        final SecretKey secretKey = new SecretKeySpec(jwtRefreshTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
-
-        final String generatedToken = Jwts.builder()
-                .claim(EMAIL_KEY, email)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(secretKey)
-                .compact();
+        final String generatedToken = buildJwtToken(email, REFRESH_TOKEN);
 
         saveTokenExpiration(email, generatedToken);
 
@@ -111,6 +95,27 @@ public class JwtTokenProvider {
             final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
+    }
+
+    private String buildJwtToken(final String email, final String specifier) {
+        final Date now = new Date();
+        Date expiryDate = null;
+        SecretKey secretKey = null;
+
+        if (specifier.equals(ACCESS_TOKEN)) {
+            expiryDate = new Date(now.getTime() + jwtAccessTokenExpirationInMs);
+            secretKey = new SecretKeySpec(jwtAccessTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        } else if (specifier.equals(REFRESH_TOKEN)) {
+            expiryDate = new Date(now.getTime() + jwtRefreshTokenExpirationInMs);
+            secretKey = new SecretKeySpec(jwtRefreshTokenSecret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        }
+
+        return Jwts.builder()
+                .claim(EMAIL_KEY, email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
     }
 
     private JwtParser getAccessTokenParser() {
