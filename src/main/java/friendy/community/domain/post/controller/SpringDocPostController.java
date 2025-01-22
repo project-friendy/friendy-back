@@ -2,6 +2,7 @@ package friendy.community.domain.post.controller;
 
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
+import friendy.community.domain.post.dto.response.PostListResponse;
 import friendy.community.global.swagger.error.ApiErrorResponse;
 import friendy.community.global.swagger.error.ErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "게시글 API", description = "게시글 생성 API")
 public interface SpringDocPostController {
@@ -35,7 +37,7 @@ public interface SpringDocPostController {
     @Operation(summary = "게시글 수정", description = "기존 게시글을 수정합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 수정 성공")
     @ApiErrorResponse(status = HttpStatus.BAD_REQUEST, instance = "/posts/{postId}", errorCases = {
-        @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용이 입력되지 않았습니다.")
+            @ErrorCase(description = "게시글 내용 없음", exampleMessage = "게시글 내용이 입력되지 않았습니다.")
     })
     @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/{postId}", errorCases = {
             @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다.")
@@ -68,7 +70,14 @@ public interface SpringDocPostController {
 
     })
     ResponseEntity<Void> deletePost(
-        HttpServletRequest httpServletRequest,
-        @PathVariable Long postId
+            HttpServletRequest httpServletRequest,
+            @PathVariable Long postId
     );
+
+    @Operation(summary = "게시글 목록 조회", description = "페이지네이션을 통해 게시글 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공")
+    ResponseEntity<PostListResponse> getPostsList(
+            @RequestParam(defaultValue = "0") int page
+    );
+
 }
