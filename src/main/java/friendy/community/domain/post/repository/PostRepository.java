@@ -15,7 +15,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
         p.id,
         p.content,
         p.createdDate,
-        null,
         p.likeCount,
         p.commentCount,
         p.shareCount,
