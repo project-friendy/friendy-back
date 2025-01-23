@@ -7,7 +7,7 @@ import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.PostListResponse;
-import friendy.community.domain.post.dto.response.PostSummary;
+import friendy.community.domain.post.dto.response.PostSummaryResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -66,7 +66,7 @@ public class PostService {
 
     public PostListResponse getAllPosts(Pageable pageable) {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
-        Page<PostSummary> postSummaryPage = postRepository.findAllPostsWithMember(defaultPageable);
+        Page<PostSummaryResponse> postSummaryPage = postRepository.findAllPostsWithMember(defaultPageable);
 
         return new PostListResponse(
                 mapToPostSummaryList(postSummaryPage),
@@ -93,16 +93,21 @@ public class PostService {
         return authService.getMemberByEmail(email);
     }
 
-    private List<PostSummary> mapToPostSummaryList(Page<PostSummary> postSummaryPage) {
+    private List<PostSummaryResponse> mapToPostSummaryList(Page<PostSummaryResponse> postSummaryPage) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
         return postSummaryPage.getContent().stream()
-                .map(postSummary -> new PostSummary(
-                        postSummary.id(),
-                        postSummary.content(),
-                        postSummary.createdAt(),
-                        calculateTimeAgo(postSummary.createdAt()),
-                        postSummary.author()
-                ))
-                .toList();
+            .map(postSummaryResponse -> new PostSummaryResponse(
+                postSummaryResponse.id(),
+                postSummaryResponse.content(),
+                postSummaryResponse.createdAt(),
+                calculateTimeAgo(postSummaryResponse.createdAt()),
+                postSummaryResponse.likeCount(),
+                postSummaryResponse.commentCount(),
+                postSummaryResponse.shareCount(),
+                postSummaryResponse.authorResponse()
+            ))
+            .toList();
     }
 
     private String calculateTimeAgo(String createdAt) {
