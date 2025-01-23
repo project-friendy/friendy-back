@@ -27,6 +27,15 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private int likeCount = 0;
+
+    @Column(nullable = false)
+    private int commentCount = 0;
+
+    @Column(nullable = false)
+    private int shareCount = 0;
+
     protected Post(final PostCreateRequest request, final Member member) {
         this.content = request.content();
         this.member = member;

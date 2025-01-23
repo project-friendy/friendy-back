@@ -1,6 +1,6 @@
 package friendy.community.domain.post.dto.response;
 
-public record Author(
+public record AuthorResponse(
         Long memberId,
         String nickname
 ) {
