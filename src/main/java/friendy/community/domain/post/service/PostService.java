@@ -68,6 +68,8 @@ public class PostService {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
         Page<PostSummaryResponse> postSummaryPage = postRepository.findAllPostsWithMember(defaultPageable);
 
+        validatePageNumber(defaultPageable.getPageNumber(), postSummaryPage);
+
         return new PostListResponse(
                 mapToPostSummaryList(postSummaryPage),
                 postSummaryPage.getNumber(),
@@ -87,6 +89,12 @@ public class PostService {
         }
     }
 
+    private void validatePageNumber(int requestedPage, Page<?> page) {
+        if (requestedPage >= page.getTotalPages()) {
+            throw new FriendyException(ErrorCode.PAGE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다.");
+        }
+    }
+
     private Member getMemberFromRequest(HttpServletRequest httpServletRequest) {
         final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
         final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
@@ -101,28 +109,12 @@ public class PostService {
                 postSummaryResponse.id(),
                 postSummaryResponse.content(),
                 postSummaryResponse.createdAt(),
-                calculateTimeAgo(postSummaryResponse.createdAt()),
                 postSummaryResponse.likeCount(),
                 postSummaryResponse.commentCount(),
                 postSummaryResponse.shareCount(),
                 postSummaryResponse.authorResponse()
             ))
             .toList();
-    }
-
-    private String calculateTimeAgo(String createdAt) {
-        LocalDateTime createdDate = LocalDateTime.parse(createdAt, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-        Duration duration = Duration.between(createdDate, LocalDateTime.now());
-        long hours = duration.toHours();
-        long minutes = duration.toMinutes();
-
-        if (hours > 0) {
-            return hours + "시간 전";
-        } else if (minutes > 0) {
-            return minutes + "분 전";
-        } else {
-            return "방금 전";
-        }
     }
 
 }
