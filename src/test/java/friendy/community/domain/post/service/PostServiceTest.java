@@ -7,6 +7,7 @@ import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.domain.member.service.MemberService;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
+import friendy.community.domain.post.dto.response.PostListResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -213,4 +216,27 @@ class PostServiceTest {
             .hasMessageContaining("게시글은 작성자 본인만 관리할 수 있습니다.")
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
     }
+    @Test
+    @DisplayName("게시글 목록 조회가 성공적으로 수행되면 PostListResponse를 리턴한다")
+    void getAllPostsSuccessfullyReturnsPostListResponse() {
+        //Given
+        postSetUp("This is content 1");
+        postSetUp("This is content 2");
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        //When
+        PostListResponse response = postService.getAllPosts(pageable);
+
+        //Then
+        assertThat(response).isNotNull();
+        assertThat(response.posts())
+            .extracting("content")
+            .containsExactlyInAnyOrder("This is content 1", "This is content 2"); // 게시글 내용 검증
+        assertThat(response.currentPage()).isEqualTo(0);
+        assertThat(response.totalPages()).isEqualTo(1);
+        assertThat(response.totalElements()).isEqualTo(2);
+
+    }
+
 }
