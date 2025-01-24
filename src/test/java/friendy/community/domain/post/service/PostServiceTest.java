@@ -236,7 +236,5 @@ class PostServiceTest {
         assertThat(response.currentPage()).isEqualTo(0);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalElements()).isEqualTo(2);
-
     }
-
 }
