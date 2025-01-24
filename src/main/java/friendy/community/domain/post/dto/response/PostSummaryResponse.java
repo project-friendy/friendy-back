@@ -12,10 +12,7 @@ public record PostSummaryResponse(
     int shareCount,
     AuthorResponse authorResponse
 ) {
-    public PostSummaryResponse(Long id, String content, LocalDateTime createdAt,
-                               int likeCount, int commentCount, int shareCount, AuthorResponse authorResponse) {
-        this(id, content,
-            createdAt != null ? createdAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : null,
-            likeCount, commentCount, shareCount, authorResponse);
+    public PostSummaryResponse(Long id, String content, LocalDateTime createdDate, int likeCount, int commentCount, int shareCount, AuthorResponse authorResponse) {
+        this(id, content, createdDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")), likeCount, commentCount, shareCount, authorResponse);
     }
 }
