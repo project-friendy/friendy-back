@@ -76,6 +76,9 @@ public interface SpringDocPostController {
 
     @Operation(summary = "게시글 목록 조회", description = "페이지네이션을 통해 게시글 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공")
+    @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/list", errorCases = {
+        @ErrorCase(description = "요청한 페이지가 존재하지 않음", exampleMessage = "요청한 페이지가 존재하지 않습니다.")
+    })
     ResponseEntity<PostListResponse> getPostsList(
             @RequestParam(defaultValue = "0") int page
     );
