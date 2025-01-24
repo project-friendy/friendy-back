@@ -91,7 +91,7 @@ public class PostService {
 
     private void validatePageNumber(int requestedPage, Page<?> page) {
         if (requestedPage >= page.getTotalPages()) {
-            throw new FriendyException(ErrorCode.PAGE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다.");
+            throw new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다.");
         }
     }
 
@@ -102,7 +102,6 @@ public class PostService {
     }
 
     private List<PostSummaryResponse> mapToPostSummaryList(Page<PostSummaryResponse> postSummaryPage) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         return postSummaryPage.getContent().stream()
             .map(postSummaryResponse -> new PostSummaryResponse(
