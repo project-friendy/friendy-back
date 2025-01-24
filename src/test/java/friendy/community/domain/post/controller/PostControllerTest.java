@@ -185,7 +185,7 @@ class PostControllerTest {
     public void getPostsListWithNonExistentPageReturns404NotFound() throws Exception {
         // Given
         when(postService.getAllPosts(any(Pageable.class)))
-            .thenThrow(new FriendyException(ErrorCode.PAGE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다."));
+            .thenThrow(new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다."));
 
         // When & Then
         mockMvc.perform(get("/posts/list")
