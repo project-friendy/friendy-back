@@ -169,4 +169,23 @@ class JwtTokenProviderTest {
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : " + tokenWithoutEmailClaim);
     }
+
+    @Test
+    @DisplayName("유효한 리프레시 토큰이 Redis에 저장되어 있지 않으면 예외를 발생시킨다")
+    void throwExceptionForValidRefreshTokenNotSavedInRedis() {
+        // Redis Mock 설정
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        // given
+        String email = "example@friendy.com";
+        String refreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        when(redisTemplate.hasKey(email)).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> jwtTokenProvider.extractEmailFromRefreshToken(refreshToken))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + refreshToken);
+    }
 }
