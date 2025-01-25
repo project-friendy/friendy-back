@@ -83,13 +83,14 @@ class AuthServiceTest {
     @Test
     @DisplayName("토큰 재발급 성공 시 새로운 액세스 토큰과 리프레시 토큰이 반환된다.")
     void reissueTokenSuccessfullyReturnsNewTokens() {
-        // Redis Mock 셋업
-        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
         // Given
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         String refreshToken = CORRECT_REFRESH_TOKEN;
+
+        // Redis Mock 셋업
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.hasKey("example@friendy.com")).thenReturn(true);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // When
         TokenResponse response = authService.reissueToken(refreshToken);
