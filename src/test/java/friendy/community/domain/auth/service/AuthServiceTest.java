@@ -2,6 +2,7 @@ package friendy.community.domain.auth.service;
 
 import friendy.community.domain.auth.dto.request.LoginRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
+import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
@@ -98,12 +99,13 @@ class AuthServiceTest {
         // Given
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
+        final String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
         final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(true);
 
         // When
-        authService.logout(refreshToken);
+        authService.logout(accessToken, refreshToken);
 
         // Then
         verify(redisTemplate, times(1)).delete(memberEmail);
@@ -119,12 +121,13 @@ class AuthServiceTest {
         // Given
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
+        String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
         final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(false);
 
         // When & Then
-        assertThatThrownBy(() -> authService.logout(refreshToken))
+        assertThatThrownBy(() -> authService.logout(accessToken, refreshToken))
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + refreshToken);
     }
@@ -133,22 +136,24 @@ class AuthServiceTest {
     @DisplayName("만료된 리프레시 토큰으로 로그아웃 요청을 하면 예외가 발생한다.")
     void logoutRequestWithExpiredRefreshTokenThrowsException() {
         // Given
-        final String expiredToken = EXPIRED_TOKEN;
+        final String accessToken = jwtTokenProvider.generateAccessToken("example@friendy.com");
+        final String expiredRefreshToken = EXPIRED_TOKEN;
 
         // When & Then
-        assertThatThrownBy(() -> authService.logout(expiredToken))
+        assertThatThrownBy(() -> authService.logout(accessToken, expiredRefreshToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + expiredToken);
+                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + expiredRefreshToken);
     }
 
     @Test
     @DisplayName("잘못된 리프레시 토큰으로 로그아웃 요청을 하면 예외가 발생한다.")
     void logoutRequestWithMalformedRefreshTokenThrowsException() {
         // Given
+        final String accessToken = jwtTokenProvider.generateAccessToken("example@friendy.com");
         final String malformedToken = MALFORMED_JWT_TOKEN;
 
         // When & Then
-        assertThatThrownBy(() -> authService.logout(malformedToken))
+        assertThatThrownBy(() -> authService.logout(accessToken, malformedToken))
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("인증 실패(잘못된 리프레시 토큰) - 토큰 : " + malformedToken);
     }
