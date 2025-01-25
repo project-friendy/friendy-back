@@ -129,7 +129,7 @@ class AuthServiceTest {
         // When & Then
         assertThatThrownBy(() -> authService.logout(accessToken, refreshToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + refreshToken);
+                .hasMessageContaining("인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + refreshToken);
     }
 
     @Test

@@ -44,7 +44,6 @@ public class JwtTokenProvider {
         saveRefreshToken(email, generatedToken);
 
         return generatedToken;
-
     }
 
     public String extractEmailFromAccessToken(final String token) {
@@ -67,7 +66,7 @@ public class JwtTokenProvider {
             final String logMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
-        validateRefreshToken(token, extractedEmail);
+        validateRefreshTokenInRedis(token, extractedEmail);
         return extractedEmail;
     }
 
@@ -83,6 +82,12 @@ public class JwtTokenProvider {
         }
     }
 
+    public void deleteRefreshToken(final String email) {
+        if (!Boolean.TRUE.equals(redisTemplate.hasKey(email)))
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 되어있지 않은 사용자입니다.");
+        redisTemplate.delete(email);
+    }
+
     private void validateRefreshToken(final String token) {
         try {
             final Claims claims = getRefreshTokenParser().parseClaimsJws(token).getBody();
@@ -95,9 +100,9 @@ public class JwtTokenProvider {
         }
     }
 
-    private void validateRefreshToken(final String token, final String email) {
-        if (!redisTemplate.hasKey(email)) {
-            final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
+    private void validateRefreshTokenInRedis(final String token, final String email) {
+        if (!Boolean.TRUE.equals(redisTemplate.hasKey(email))) {
+            final String logMessage = "인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
     }
@@ -135,9 +140,4 @@ public class JwtTokenProvider {
         );
     }
 
-    public void deleteRefreshToken(final String email) {
-        if (!redisTemplate.hasKey(email))
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 되어있지 않은 사용자입니다.");
-        boolean isEmailExists = redisTemplate.delete(email);
-    }
 }
