@@ -46,6 +46,15 @@ public class AuthService {
         return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
+    public void withdrawal(final String accessToken, final String refreshToken) {
+        logout(accessToken, refreshToken);
+
+        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
+        final Member member = getMemberByEmail(email);
+
+        memberRepository.delete(member);
+    }
+
     public Member getMemberByEmail(String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new FriendyException(ErrorCode.UNAUTHORIZED_EMAIL, "해당 이메일의 회원이 존재하지 않습니다."));
