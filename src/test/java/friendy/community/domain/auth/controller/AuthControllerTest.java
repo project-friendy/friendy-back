@@ -186,6 +186,23 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("로그아웃이 성공적으로 처리되면 200 OK를 반환한다.")
+    void logoutSuccessfullyReturns200Ok() throws Exception {
+        // Given
+        String refreshToken = "Bearer refreshToken";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization-Refresh", "Bearer refreshToken");
+
+        when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
+                .thenReturn("refreshToken");
+
+        mockMvc.perform(post("/auth/logout")
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("토큰 재발급 요청이 성공적으로 처리되면 200 OK와 함께 새로운 토큰 헤더가 반환된다")
     void reissueTokenSuccessfullyReturnsNewTokensInHeaders() throws Exception {
         // Given
