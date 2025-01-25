@@ -56,4 +56,16 @@ public class AuthController implements SpringDocAuthController{
                 .header("Authorization-Refresh", "Bearer " + response.refreshToken())
                 .build();
     }
+
+    @PostMapping("/withdrawal")
+    public ResponseEntity<Void> withdrawal(
+            HttpServletRequest httpServletRequest
+    ) {
+        final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
+        final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
+        authService.withdrawal(accessToken, refreshToken);
+
+        return ResponseEntity.ok()
+                .build();
+    }
 }
