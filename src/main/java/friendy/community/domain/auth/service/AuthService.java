@@ -31,7 +31,6 @@ public class AuthService {
     }
 
     public void logout(final String refreshToken) {
-        jwtTokenProvider.validateRefreshToken(refreshToken);
         final String email = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
 
         jwtTokenProvider.deleteRefreshToken(email);
