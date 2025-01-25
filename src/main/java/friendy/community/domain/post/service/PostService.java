@@ -10,6 +10,7 @@ import friendy.community.domain.post.dto.response.PostListResponse;
 import friendy.community.domain.post.dto.response.PostSummaryResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
+import friendy.community.domain.post.repository.interfaces.PostQueryRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -31,6 +29,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final JwtTokenExtractor jwtTokenExtractor;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
@@ -66,7 +65,7 @@ public class PostService {
 
     public PostListResponse getAllPosts(Pageable pageable) {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
-        Page<PostSummaryResponse> postSummaryPage = postRepository.findAllPostsWithMember(defaultPageable);
+        Page<PostSummaryResponse> postSummaryPage = postQueryRepository.findAllPostsWithMember(defaultPageable);
 
         validatePageNumber(defaultPageable.getPageNumber(), postSummaryPage);
 

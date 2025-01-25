@@ -29,7 +29,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'com.querydsl:querydsl-jpa:5.1.0'
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'org.springframework.security:spring-security-crypto'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
@@ -46,7 +47,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor "com.querydsl:querydsl-apt:5.1.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
