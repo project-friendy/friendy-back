@@ -188,4 +188,22 @@ class JwtTokenProviderTest {
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + refreshToken);
     }
+
+    @Test
+    @DisplayName("로그인 되어있지 않은 상태인 사용자의 토큰을 Redis에서 삭제하려 하면 예외를 발생시킨다.")
+    void throwExceptionForDeleteRefreshTokenInRedisWithNotLoggedInUsersEmail() {
+        // Redis Mock 설정
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        // Given
+        String email = "notLoggedInUser@friendy.com";
+
+        when(redisTemplate.hasKey(email)).thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> jwtTokenProvider.deleteRefreshToken(email))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("로그인 되어있지 않은 사용자입니다.");
+    }
 }
