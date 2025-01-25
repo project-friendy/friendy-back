@@ -136,10 +136,8 @@ public class JwtTokenProvider {
     }
 
     public void deleteRefreshToken(final String email) {
-        if (redisTemplate.hasKey(email))
-            redisTemplate.delete(email);
-        else
+        if (!redisTemplate.hasKey(email))
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 되어있지 않은 사용자입니다.");
+        boolean isEmailExists = redisTemplate.delete(email);
     }
-
 }
