@@ -1,5 +1,6 @@
 package friendy.community.domain.auth.jwt;
 
+import friendy.community.domain.auth.service.AuthService;
 import friendy.community.global.exception.FriendyException;
 import org.assertj.core.data.Percentage;
 import org.hamcrest.number.IsCloseTo;
@@ -123,6 +124,8 @@ class JwtTokenProviderTest {
         // given
         String email = "example@friendy.com";
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        when(redisTemplate.hasKey(email)).thenReturn(true);
 
         // when
         String extractedEmail = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
