@@ -67,7 +67,7 @@ public class JwtTokenProvider {
             final String logMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
-
+        validateRefreshToken(token, extractedEmail);
         return extractedEmail;
     }
 
@@ -83,17 +83,20 @@ public class JwtTokenProvider {
         }
     }
 
-    public void validateRefreshToken(final String token) {
-        if (!redisTemplate.hasKey(extractEmailFromRefreshToken(token))) {
-            final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
-        }
+    private void validateRefreshToken(final String token) {
         try {
             final Claims claims = getRefreshTokenParser().parseClaimsJws(token).getBody();
         } catch (MalformedJwtException | UnsupportedJwtException e) {
             final String logMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         } catch (ExpiredJwtException e) {
+            final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
+        }
+    }
+
+    private void validateRefreshToken(final String token, final String email) {
+        if (!redisTemplate.hasKey(email)) {
             final String logMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
