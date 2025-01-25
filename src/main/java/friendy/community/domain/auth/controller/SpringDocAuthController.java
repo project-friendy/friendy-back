@@ -71,4 +71,24 @@ public interface SpringDocAuthController {
     })
     ResponseEntity<Void> reissueToken(HttpServletRequest httpServletRequest);
 
+    @Operation(
+            summary = "회원 탈퇴",
+            security = {
+                    @SecurityRequirement(name = "bearerAuth"),
+                    @SecurityRequirement(name = "refreshAuth")
+            }
+    )
+    @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공")
+    @ApiErrorResponse(status = HttpStatus.UNAUTHORIZED, instance = "/withdrawal", errorCases = {
+            @ErrorCase(description = "잘못된 액세스 토큰", exampleMessage = "인증 실패(잘못된 액세스 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "액세스 토큰 추출 실패", exampleMessage = "인증 실패(액세스 토큰 추출 실패) - 토큰 : {token}"),
+            @ErrorCase(description = "액세스 토큰 만료", exampleMessage = "인증 실패(만료된 액세스 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "액세스 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 액세스 토큰 Payload 이메일 누락) - 토큰 : {token}"),
+            @ErrorCase(description = "잘못된 리프레시 토큰", exampleMessage = "인증 실패(잘못된 리프레시 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰 추출 실패", exampleMessage = "인증 실패(리프레시 토큰 추출 실패) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰 만료", exampleMessage = "인증 실패(만료된 리프레시 토큰) - 토큰 : {token}"),
+            @ErrorCase(description = "리프레시 토큰에 이메일 클레임 없음", exampleMessage = "인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : {token}"),
+            @ErrorCase(description = "로그아웃한 사용자 리프레시 토큰", exampleMessage = "인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : {token}")
+    })
+    ResponseEntity<Void> withdrawal(HttpServletRequest httpServletRequest);
 }
