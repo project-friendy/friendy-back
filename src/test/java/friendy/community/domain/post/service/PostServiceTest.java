@@ -216,6 +216,7 @@ class PostServiceTest {
             .hasMessageContaining("게시글은 작성자 본인만 관리할 수 있습니다.")
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
     }
+
     @Test
     @DisplayName("게시글 목록 조회가 성공적으로 수행되면 PostListResponse를 리턴한다")
     void getAllPostsSuccessfullyReturnsPostListResponse() {
@@ -232,9 +233,22 @@ class PostServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.posts())
             .extracting("content")
-            .containsExactlyInAnyOrder("This is content 1", "This is content 2"); // 게시글 내용 검증
+            .containsExactlyInAnyOrder("This is content 1", "This is content 2");
         assertThat(response.currentPage()).isEqualTo(0);
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.totalElements()).isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("존재하지 않는 페이지를 요청하면 예외를 던진다")
+    void requestingNonExistentPageThrowsException() {
+        // Given
+        Pageable pageable = PageRequest.of(10, 10); // 존재하지 않는 페이지 요청
+
+        // When & Then
+        assertThatThrownBy(() -> postService.getAllPosts(pageable))
+                .isInstanceOf(FriendyException.class)
+                .hasMessage("요청한 페이지가 존재하지 않습니다.");
+    }
+
 }
