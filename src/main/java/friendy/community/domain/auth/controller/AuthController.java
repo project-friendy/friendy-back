@@ -38,8 +38,7 @@ public class AuthController implements SpringDocAuthController{
         HttpServletRequest httpServletRequest
     ) {
         final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
-        final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
-        authService.logout(accessToken, refreshToken);
+        authService.logout(accessToken);
 
         return ResponseEntity.ok().build();
     }
@@ -63,7 +62,7 @@ public class AuthController implements SpringDocAuthController{
     ) {
         final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
         final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
-        authService.withdrawal(accessToken, refreshToken);
+        authService.withdrawal(accessToken);
 
         return ResponseEntity.ok()
                 .build();
