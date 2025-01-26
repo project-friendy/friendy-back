@@ -101,7 +101,7 @@ public class JwtTokenProvider {
     }
 
     private void validateRefreshTokenInRedis(final String token, final String email) {
-        if (!Boolean.TRUE.equals(redisTemplate.hasKey(email))) {
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(email))) {
             final String logMessage = "인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
