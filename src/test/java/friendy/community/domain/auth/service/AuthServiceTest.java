@@ -21,6 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.Console;
+import java.util.Optional;
 
 import static friendy.community.domain.auth.fixtures.TokenFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -176,6 +177,51 @@ class AuthServiceTest {
         // Then
         assertThat(response.accessToken()).isNotNull();
         assertThat(response.refreshToken()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("유효한 액세스 토큰과 리프레시 토큰으로 요청 시 성공적으로 회원 정보가 데이터베이스에서 삭제된다.")
+    void requestWithValidTokensWithdrawalSuccessfully() {
+        // Redis Mock 셋업
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        // Given
+        final Member savedMember = memberRepository.save(MemberFixture.memberFixture());
+        final String memberEmail = savedMember.getEmail();
+
+        final String validAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
+        final String validRefreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
+
+        when(redisTemplate.hasKey(memberEmail)).thenReturn(true);
+
+        // When
+        authService.withdrawal(validAccessToken, validRefreshToken);
+
+        // Then
+        assertThat(memberRepository.findByEmail(memberEmail)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("로그인하지 않은 회원의 토큰으로 요청 시 예외를 발생한다.")
+    void requestWithUnauthorizedUsersTokenThrowsException() {
+        // Redis Mock 셋업
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        // Given
+        final Member savedMember = memberRepository.save(MemberFixture.memberFixture());
+        final String memberEmail = savedMember.getEmail();
+
+        final String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
+        final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
+
+        when(redisTemplate.hasKey(memberEmail)).thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> authService.withdrawal(accessToken, refreshToken))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + refreshToken);
     }
 
 }
