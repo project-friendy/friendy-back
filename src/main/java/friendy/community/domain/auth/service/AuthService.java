@@ -30,10 +30,8 @@ public class AuthService {
         return TokenResponse.of(accessToken, refreshToken);
     }
 
-    public void logout(final String accessToken, final String refreshToken) {
-        jwtTokenProvider.validateAccessToken(accessToken);
-        final String email = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
-
+    public void logout(final String accessToken) {
+        final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
         jwtTokenProvider.deleteRefreshToken(email);
     }
 
@@ -46,8 +44,8 @@ public class AuthService {
         return TokenResponse.of(newAccessToken, newRefreshToken);
     }
 
-    public void withdrawal(final String accessToken, final String refreshToken) {
-        logout(accessToken, refreshToken);
+    public void withdrawal(final String accessToken) {
+        logout(accessToken);
 
         final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
         final Member member = getMemberByEmail(email);
