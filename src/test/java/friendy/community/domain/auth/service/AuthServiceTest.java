@@ -101,12 +101,11 @@ class AuthServiceTest {
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
         final String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
-        final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(true);
 
         // When
-        authService.logout(accessToken, refreshToken);
+        authService.logout(accessToken);
 
         // Then
         verify(redisTemplate, times(1)).delete(memberEmail);
@@ -123,41 +122,15 @@ class AuthServiceTest {
         Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
         String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
-        final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(false);
 
         // When & Then
-        assertThatThrownBy(() -> authService.logout(accessToken, refreshToken))
+        assertThatThrownBy(() -> authService.logout(accessToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + refreshToken);
+                .hasMessageContaining("로그인 상태가 아닌 사용자");
     }
 
-    @Test
-    @DisplayName("만료된 리프레시 토큰으로 로그아웃 요청을 하면 예외가 발생한다.")
-    void logoutRequestWithExpiredRefreshTokenThrowsException() {
-        // Given
-        final String accessToken = jwtTokenProvider.generateAccessToken("example@friendy.com");
-        final String expiredRefreshToken = EXPIRED_TOKEN;
-
-        // When & Then
-        assertThatThrownBy(() -> authService.logout(accessToken, expiredRefreshToken))
-                .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(만료된 리프레시 토큰) - 토큰 : " + expiredRefreshToken);
-    }
-
-    @Test
-    @DisplayName("잘못된 리프레시 토큰으로 로그아웃 요청을 하면 예외가 발생한다.")
-    void logoutRequestWithMalformedRefreshTokenThrowsException() {
-        // Given
-        final String accessToken = jwtTokenProvider.generateAccessToken("example@friendy.com");
-        final String malformedToken = MALFORMED_JWT_TOKEN;
-
-        // When & Then
-        assertThatThrownBy(() -> authService.logout(accessToken, malformedToken))
-                .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(잘못된 리프레시 토큰) - 토큰 : " + malformedToken);
-    }
 
     @Test
     @DisplayName("토큰 재발급 성공 시 새로운 액세스 토큰과 리프레시 토큰이 반환된다.")
@@ -168,8 +141,9 @@ class AuthServiceTest {
 
         // Redis Mock 셋업
         ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.hasKey("example@friendy.com")).thenReturn(true);
+        when(redisTemplate.hasKey(savedMember.getEmail())).thenReturn(true);
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().get(savedMember.getEmail())).thenReturn(refreshToken);
 
         // When
         TokenResponse response = authService.reissueToken(refreshToken);
@@ -180,7 +154,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("유효한 액세스 토큰과 리프레시 토큰으로 요청 시 성공적으로 회원 정보가 데이터베이스에서 삭제된다.")
+    @DisplayName("유효한 액세스 토큰으로 요청 시 성공적으로 회원 정보가 데이터베이스에서 삭제된다.")
     void requestWithValidTokensWithdrawalSuccessfully() {
         // Redis Mock 셋업
         ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
@@ -189,21 +163,19 @@ class AuthServiceTest {
         // Given
         final Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
-
         final String validAccessToken = jwtTokenProvider.generateAccessToken(memberEmail);
-        final String validRefreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(true);
 
         // When
-        authService.withdrawal(validAccessToken, validRefreshToken);
+        authService.withdrawal(validAccessToken);
 
         // Then
         assertThat(memberRepository.findByEmail(memberEmail)).isEmpty();
     }
 
     @Test
-    @DisplayName("로그인하지 않은 회원의 토큰으로 요청 시 예외를 발생한다.")
+    @DisplayName("로그인하지 않은 회원의 토큰으로 탈퇴 요청 시 예외를 발생한다.")
     void requestWithUnauthorizedUsersTokenThrowsException() {
         // Redis Mock 셋업
         ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
@@ -212,16 +184,14 @@ class AuthServiceTest {
         // Given
         final Member savedMember = memberRepository.save(MemberFixture.memberFixture());
         final String memberEmail = savedMember.getEmail();
-
         final String accessToken = jwtTokenProvider.generateAccessToken(memberEmail);
-        final String refreshToken = jwtTokenProvider.generateRefreshToken(memberEmail);
 
         when(redisTemplate.hasKey(memberEmail)).thenReturn(false);
 
         // When & Then
-        assertThatThrownBy(() -> authService.withdrawal(accessToken, refreshToken))
+        assertThatThrownBy(() -> authService.withdrawal(accessToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + refreshToken);
+                .hasMessageContaining("로그인 상태가 아닌 사용자");
     }
 
 }

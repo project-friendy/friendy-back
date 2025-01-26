@@ -126,6 +126,7 @@ class JwtTokenProviderTest {
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
 
         when(redisTemplate.hasKey(email)).thenReturn(true);
+        when(redisTemplate.opsForValue().get(email)).thenReturn(refreshToken);
 
         // when
         String extractedEmail = jwtTokenProvider.extractEmailFromRefreshToken(refreshToken);
@@ -186,7 +187,7 @@ class JwtTokenProviderTest {
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractEmailFromRefreshToken(refreshToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + refreshToken);
+                .hasMessageContaining("로그인 상태가 아닌 사용자");
     }
 
     @Test
@@ -204,6 +205,6 @@ class JwtTokenProviderTest {
         // When & Then
         assertThatThrownBy(() -> jwtTokenProvider.deleteRefreshToken(email))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("로그인 되어있지 않은 사용자입니다.");
+                .hasMessageContaining("로그인 상태가 아닌 사용자");
     }
 }
