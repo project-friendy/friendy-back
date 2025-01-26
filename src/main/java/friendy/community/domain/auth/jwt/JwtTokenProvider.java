@@ -84,7 +84,7 @@ public class JwtTokenProvider {
 
     public void deleteRefreshToken(final String email) {
         if (!Boolean.TRUE.equals(redisTemplate.hasKey(email)))
-            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 되어있지 않은 사용자입니다.");
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, "로그인 상태가 아닌 사용자");
         redisTemplate.delete(email);
     }
 
@@ -102,7 +102,13 @@ public class JwtTokenProvider {
 
     private void validateRefreshTokenInRedis(final String token, final String email) {
         if (Boolean.FALSE.equals(redisTemplate.hasKey(email))) {
-            final String logMessage = "인증 실패(등록되지 않은 리프레시 토큰) - 토큰 : " + token;
+            final String logMessage = "로그인 상태가 아닌 사용자";
+            throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
+        }
+        if (Boolean.FALSE.equals(
+                redisTemplate.opsForValue().get(email).equals(token)
+        )) {
+            final String logMessage = "인증 실패 (다른 유저의 토큰으로 인증 시도) - 토큰 : " + token;
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
     }
