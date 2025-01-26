@@ -2,10 +2,14 @@ package friendy.community.domain.auth.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.auth.dto.request.LoginRequest;
+import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.auth.dto.response.TokenResponse;
 import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.service.AuthService;
+import friendy.community.domain.member.fixture.MemberFixture;
+import friendy.community.domain.member.model.Member;
+import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +25,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static friendy.community.domain.auth.fixtures.TokenFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -44,6 +49,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private JwtTokenExtractor jwtTokenExtractor;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -288,6 +296,21 @@ class AuthControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertThat(result.getResolvedException().getMessage())
                         .contains("인증 실패(JWT 리프레시 토큰 Payload 이메일 누락) - 토큰 : missingEmailClaimToken"));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 요청이 성공적으로 처리되면 200 OK가 반환된다.")
+    void withdrawalSuccessfullyReturns200() throws Exception {
+        // Given
+        String accessToken = "Bearer validAccessToken";
+        String refreshToken = "Bearer validRefreshToken";
+
+        // When & Then
+        mockMvc.perform(post("/auth/withdrawal")
+                        .header("Authorization", accessToken)
+                        .header("Authorization-Refresh", refreshToken))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
 }
