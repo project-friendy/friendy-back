@@ -150,6 +150,39 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("게시글 조회 성공 시 200 OK와 게시글 정보를 반환한다")
+    void getPostSuccessfullyReturns200Ok() throws Exception {
+        // Given
+        Long postId = 1L;
+        FindPostResponse response = new FindPostResponse(1L, "Post 1", "2025-01-23T10:00:00", 10, 5, 2, new FindMemberResponse(1L, "author1"));
+
+        when(postService.getPost(anyLong())).thenReturn(response);
+
+        // When & Then
+        mockMvc.perform(get("/posts/{postId}", postId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글을 조회하면 404 Not Found를 반환한다")
+    void getPostWithNonExistentIdReturns404NotFound() throws Exception {
+        // Given
+        Long nonExistentPostId = 999L;
+
+        when(postService.getPost(anyLong()))
+                .thenThrow(new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다."));
+
+        // When & Then
+        mockMvc.perform(get("/posts/{postId}", nonExistentPostId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("존재하지 않는 게시글입니다."));
+    }
+
+    @Test
     @DisplayName("게시글 목록 조회 성공 시 200 OK 반환")
     public void getPostsListSuccessfullyReturns200Ok() throws Exception {
         // Given
