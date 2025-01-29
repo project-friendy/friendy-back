@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -28,17 +29,23 @@ public class Post extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    private int likeCount = 0;
+    @ColumnDefault("0")
+    private Integer likeCount;
 
     @Column(nullable = false)
-    private int commentCount = 0;
+    @ColumnDefault("0")
+    private Integer commentCount;
 
     @Column(nullable = false)
-    private int shareCount = 0;
+    @ColumnDefault("0")
+    private Integer shareCount;
 
     protected Post(final PostCreateRequest request, final Member member) {
-        this.content = request.content();
         this.member = member;
+        this.content = request.content();
+        this.likeCount = 0;
+        this.commentCount = 0;
+        this.shareCount = 0;
     }
 
     public static Post of(final PostCreateRequest request, final Member member) {

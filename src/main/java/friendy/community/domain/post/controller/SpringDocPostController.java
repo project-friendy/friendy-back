@@ -79,7 +79,7 @@ public interface SpringDocPostController {
     @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/list", errorCases = {
         @ErrorCase(description = "요청한 페이지가 존재하지 않음", exampleMessage = "요청한 페이지가 존재하지 않습니다.")
     })
-    ResponseEntity<PostListResponse> getPostsList(
+    ResponseEntity<PostListResponse> getAllPosts(
             @RequestParam(defaultValue = "0") int page
     );
 

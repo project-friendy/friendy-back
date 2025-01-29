@@ -3,7 +3,7 @@ package friendy.community.domain.post.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
-import friendy.community.domain.post.dto.response.AuthorResponse;
+import friendy.community.domain.post.dto.response.FindMemberResponse;
 import friendy.community.domain.post.dto.response.PostListResponse;
 import friendy.community.domain.post.dto.response.PostSummaryResponse;
 import friendy.community.domain.post.service.PostService;
@@ -153,9 +153,9 @@ class PostControllerTest {
     @DisplayName("포스트 목록 요청 시 200 OK와 함께 페이지 목록을 반환한다")
     public void getPostsListSuccessfullyReturns200Ok() throws Exception {
         // Given
-        PostSummaryResponse post1 = new PostSummaryResponse(1L, "Post 1", "2025-01-23T10:00:00", 10, 5, 2, new AuthorResponse(1L, "author1"));
-        PostSummaryResponse post2 = new PostSummaryResponse(2L, "Post 2", "2025-01-23T11:00:00",  20, 10, 3, new AuthorResponse(2L, "author2"));
-        PostSummaryResponse post3 = new PostSummaryResponse(3L, "Post 3", "2025-01-23T12:00:00", 30, 15, 5, new AuthorResponse(3L, "author3"));
+        PostSummaryResponse post1 = new PostSummaryResponse(1L, "Post 1", "2025-01-23T10:00:00", 10, 5, 2, new FindMemberResponse(1L, "author1"));
+        PostSummaryResponse post2 = new PostSummaryResponse(2L, "Post 2", "2025-01-23T11:00:00",  20, 10, 3, new FindMemberResponse(2L, "author2"));
+        PostSummaryResponse post3 = new PostSummaryResponse(3L, "Post 3", "2025-01-23T12:00:00", 30, 15, 5, new FindMemberResponse(3L, "author3"));
 
         List<PostSummaryResponse> postList = Arrays.asList(post1, post2, post3);
         Page<PostSummaryResponse> page = new PageImpl<>(postList, PageRequest.of(0, 10), postList.size());
