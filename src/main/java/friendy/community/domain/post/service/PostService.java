@@ -67,13 +67,13 @@ public class PostService {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
         Page<Post> postPage = postQueryDSLRepository.findAllPosts(defaultPageable);
 
+        validatePageNumber(defaultPageable.getPageNumber(), postPage);
         List<FindPostResponse> findPostResponses = postPage.getContent().stream()
                 .map(FindPostResponse::from)
                 .toList();
 
         return new PostListResponse(findPostResponses, postPage.getTotalPages());
     }
-
 
     private Post validatePostExistence(Long postId) {
         return postRepository.findById(postId)
