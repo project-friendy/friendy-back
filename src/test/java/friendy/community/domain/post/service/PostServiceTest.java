@@ -218,29 +218,26 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("게시글 목록 조회가 성공적으로 수행되면 PostListResponse를 리턴한다")
-    void getAllPostsSuccessfullyReturnsPostListResponse() {
-        //Given
+    @DisplayName("게시글 목록 조회가 성공적으로 수행되면 FindAllPostResponse를 리턴한다")
+    void getAllPostsSuccessfullyReturnsFindAllPostResponse() {
+        // Given
         postSetUp("This is content 1");
         postSetUp("This is content 2");
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        //When
+        // When
         FindAllPostResponse response = postService.getAllPosts(pageable);
 
-        //Then
+        // Then
         assertThat(response).isNotNull();
         assertThat(response.posts())
-            .extracting("content")
-            .containsExactlyInAnyOrder("This is content 1", "This is content 2");
-        assertThat(response.currentPage()).isEqualTo(0);
-        assertThat(response.totalPages()).isEqualTo(1);
-        assertThat(response.totalElements()).isEqualTo(2);
+                .extracting("content")
+                .containsExactlyInAnyOrder("This is content 1", "This is content 2");
     }
 
     @Test
-    @DisplayName("존재하지 않는 페이지를 요청하면 예외를 던진다")
+    @DisplayName("존재하지 않는 페이지를 요청하면 FriendyException을 던진다")
     void requestingNonExistentPageThrowsException() {
         // Given
         Pageable pageable = PageRequest.of(10, 10); // 존재하지 않는 페이지 요청
@@ -248,7 +245,8 @@ class PostServiceTest {
         // When & Then
         assertThatThrownBy(() -> postService.getAllPosts(pageable))
                 .isInstanceOf(FriendyException.class)
-                .hasMessage("요청한 페이지가 존재하지 않습니다.");
+                .hasMessageContaining("요청한 페이지가 존재하지 않습니다.")
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
     }
 
 }

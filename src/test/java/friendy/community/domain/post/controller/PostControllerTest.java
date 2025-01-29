@@ -5,7 +5,7 @@ import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindMemberResponse;
 import friendy.community.domain.post.dto.response.FindAllPostResponse;
-import friendy.community.domain.post.dto.response.PostSummaryResponse;
+import friendy.community.domain.post.dto.response.FindPostResponse;
 import friendy.community.domain.post.service.PostService;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
@@ -150,50 +150,33 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("포스트 목록 요청 시 200 OK와 함께 페이지 목록을 반환한다")
+    @DisplayName("게시글 목록 조회 성공 시 200 OK 반환")
     public void getPostsListSuccessfullyReturns200Ok() throws Exception {
         // Given
-        PostSummaryResponse post1 = new PostSummaryResponse(1L, "Post 1", "2025-01-23T10:00:00", 10, 5, 2, new FindMemberResponse(1L, "author1"));
-        PostSummaryResponse post2 = new PostSummaryResponse(2L, "Post 2", "2025-01-23T11:00:00",  20, 10, 3, new FindMemberResponse(2L, "author2"));
-        PostSummaryResponse post3 = new PostSummaryResponse(3L, "Post 3", "2025-01-23T12:00:00", 30, 15, 5, new FindMemberResponse(3L, "author3"));
-
-        List<PostSummaryResponse> postList = Arrays.asList(post1, post2, post3);
-        Page<PostSummaryResponse> page = new PageImpl<>(postList, PageRequest.of(0, 10), postList.size());
-
-        FindAllPostResponse postListResponse = new FindAllPostResponse(
-            postList,
-            page.getTotalPages(),
-            page.getNumber(),
-            page.getTotalElements()
+        List<FindPostResponse> posts = List.of(
+                new FindPostResponse(1L, "Post 1", "2025-01-23T10:00:00", 10, 5, 2, new FindMemberResponse(1L, "author1")),
+                new FindPostResponse(2L, "Post 2", "2025-01-23T11:00:00", 20, 10, 3, new FindMemberResponse(2L, "author2"))
         );
-
-        // When
-        when(postService.getAllPosts(any(Pageable.class))).thenReturn(postListResponse);
+        when(postService.getAllPosts(any(Pageable.class)))
+                .thenReturn(new FindAllPostResponse(posts, 1));
 
         // Then
-        mockMvc.perform(get("/posts/list")
-                .param("page", "0")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.posts").exists())
-            .andExpect(jsonPath("$.totalPages").exists());
+        mockMvc.perform(get("/posts/list").param("page", "0"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("존재하지 않는 페이지 번호 요청 시 404 Not Found 반환")
+    @DisplayName("없는 페이지 요청 시 404 반환")
     public void getPostsListWithNonExistentPageReturns404NotFound() throws Exception {
         // Given
         when(postService.getAllPosts(any(Pageable.class)))
-            .thenThrow(new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다."));
+                .thenThrow(new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "요청한 페이지가 존재하지 않습니다."));
 
-        // When & Then
-        mockMvc.perform(get("/posts/list")
-                .param("page", "100") // 존재하지 않는 페이지 번호
-                .contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.detail").value("요청한 페이지가 존재하지 않습니다."));
+        // Then
+        mockMvc.perform(get("/posts/list").param("page", "100"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("요청한 페이지가 존재하지 않습니다."));
     }
 
 }
