@@ -7,7 +7,7 @@ import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.domain.member.service.MemberService;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
-import friendy.community.domain.post.dto.response.PostListResponse;
+import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -227,7 +227,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         //When
-        PostListResponse response = postService.getAllPosts(pageable);
+        FindAllPostResponse response = postService.getAllPosts(pageable);
 
         //Then
         assertThat(response).isNotNull();

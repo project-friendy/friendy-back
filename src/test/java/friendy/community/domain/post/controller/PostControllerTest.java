@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindMemberResponse;
-import friendy.community.domain.post.dto.response.PostListResponse;
+import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.dto.response.PostSummaryResponse;
 import friendy.community.domain.post.service.PostService;
 import friendy.community.global.exception.ErrorCode;
@@ -160,7 +160,7 @@ class PostControllerTest {
         List<PostSummaryResponse> postList = Arrays.asList(post1, post2, post3);
         Page<PostSummaryResponse> page = new PageImpl<>(postList, PageRequest.of(0, 10), postList.size());
 
-        PostListResponse postListResponse = new PostListResponse(
+        FindAllPostResponse postListResponse = new FindAllPostResponse(
             postList,
             page.getTotalPages(),
             page.getNumber(),

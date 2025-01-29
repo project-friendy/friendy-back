@@ -2,7 +2,7 @@ package friendy.community.domain.post.controller;
 
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
-import friendy.community.domain.post.dto.response.PostListResponse;
+import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -50,6 +50,7 @@ public class PostController implements SpringDocPostController {
 
     @GetMapping("/list")
     public ResponseEntity<PostListResponse> getAllPosts(
+    public ResponseEntity<FindAllPostResponse> getAllPosts(
             @RequestParam(defaultValue = "0") int page
     ) {
         Pageable pageable = PageRequest.of(page, 10);
