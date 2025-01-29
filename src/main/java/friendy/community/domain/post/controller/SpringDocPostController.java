@@ -3,6 +3,7 @@ package friendy.community.domain.post.controller;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindAllPostResponse;
+import friendy.community.domain.post.dto.response.FindPostResponse;
 import friendy.community.global.swagger.error.ApiErrorResponse;
 import friendy.community.global.swagger.error.ErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,6 +72,15 @@ public interface SpringDocPostController {
     })
     ResponseEntity<Void> deletePost(
             HttpServletRequest httpServletRequest,
+            @PathVariable Long postId
+    );
+
+    @Operation(summary = "게시글 조회", description = "페이지네이션을 통해 게시글 목록을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "게시글 조회 성공")
+    @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/{postId}", errorCases = {
+            @ErrorCase(description = "존재하지 않는 게시글 ID", exampleMessage = "존재하지 않는 게시글입니다.")
+    })
+    ResponseEntity<FindPostResponse> getPost(
             @PathVariable Long postId
     );
 
