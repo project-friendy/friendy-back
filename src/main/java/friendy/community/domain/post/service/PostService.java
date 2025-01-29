@@ -63,6 +63,13 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    public FindPostResponse getPost(final Long postId){
+        Post post = postQueryDSLRepository.findPostById(postId)
+                .orElseThrow(() -> new FriendyException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 게시글입니다."));
+
+        return FindPostResponse.from(post);
+    }
+
     public FindAllPostResponse getAllPosts(Pageable pageable) {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
         Page<Post> postPage = postQueryDSLRepository.findAllPosts(defaultPageable);
