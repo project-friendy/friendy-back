@@ -27,8 +27,9 @@ public record FindPostResponse(
     }
 
     private static String formatDateTime(LocalDateTime dateTime) {
-        return dateTime != null
-                ? dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-                : null;
+        if (dateTime == null) {
+            return null;
+        }
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 }
