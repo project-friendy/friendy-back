@@ -11,12 +11,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class PostQueryDSLRepository{
 
     private final JPAQueryFactory queryFactory;
+
+    public Optional<Post> findPostById(final Long postId) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(QPost.post)
+                        .leftJoin(QPost.post.member, QMember.member).fetchJoin()
+                        .where(QPost.post.id.eq(postId))
+                        .fetchOne()
+        );
+    }
 
     public Page<Post> findAllPosts(Pageable pageable) {
         List<Post> posts = queryFactory.selectFrom(QPost.post)
