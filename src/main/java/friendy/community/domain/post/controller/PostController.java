@@ -2,6 +2,7 @@ package friendy.community.domain.post.controller;
 
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
+import friendy.community.domain.post.dto.response.FindPostResponse;
 import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,8 +49,14 @@ public class PostController implements SpringDocPostController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<FindPostResponse> getPost(
+            @PathVariable Long postId
+    ) {
+        return ResponseEntity.ok(postService.getPost(postId));
+    }
+
     @GetMapping("/list")
-    public ResponseEntity<PostListResponse> getAllPosts(
     public ResponseEntity<FindAllPostResponse> getAllPosts(
             @RequestParam(defaultValue = "0") int page
     ) {
