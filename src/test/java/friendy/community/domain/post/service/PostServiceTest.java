@@ -8,6 +8,7 @@ import friendy.community.domain.member.service.MemberService;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindAllPostResponse;
+import friendy.community.domain.post.dto.response.FindPostResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -215,6 +216,32 @@ class PostServiceTest {
             .isInstanceOf(FriendyException.class)
             .hasMessageContaining("게시글은 작성자 본인만 관리할 수 있습니다.")
             .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+    }
+
+    @Test
+    @DisplayName("게시글 조회 요청이 성공적으로 수행되면 FindPostResponse를 리턴한다")
+    void getPostSuccessfullyReturnsFindPostResponse() {
+        // Given
+        postSetUp("This is a post content");
+
+        // When
+        FindPostResponse response = postService.getPost(1L);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.content()).isEqualTo("This is a post content");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글을 조회하면 FriendyException을 던진다")
+    void getPostWithNonExistentIdThrowsException() {
+        // Given
+        Long nonExistentPostId = 999L;
+
+        // When & Then
+        assertThatThrownBy(() -> postService.getPost(nonExistentPostId))
+                .isInstanceOf(FriendyException.class)
+                .hasMessageContaining("존재하지 않는 게시글입니다.");
     }
 
     @Test
