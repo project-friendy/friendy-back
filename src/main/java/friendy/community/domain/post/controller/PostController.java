@@ -21,41 +21,39 @@ public class PostController implements SpringDocPostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Void> createPost(HttpServletRequest httpServletRequest, @Valid @RequestBody PostCreateRequest postCreateRequest) {
-
+    public ResponseEntity<Void> createPost(
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody PostCreateRequest postCreateRequest
+    ) {
         Long postId = postService.savePost(postCreateRequest, httpServletRequest);
-
         return ResponseEntity.created(URI.create("/posts/" + postId)).build();
-
     }
 
     @PostMapping("/{postId}")
     public ResponseEntity<Void> updatePost(
             HttpServletRequest httpServletRequest,
             @PathVariable Long postId,
-            @Valid @RequestBody PostUpdateRequest postUpdateRequest) {
-
+            @Valid @RequestBody PostUpdateRequest postUpdateRequest
+    ) {
         Long returnPostId = postService.updatePost(postUpdateRequest, httpServletRequest, postId);
-
         return ResponseEntity.created(URI.create("/posts/" + returnPostId)).build();
-
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             HttpServletRequest httpServletRequest,
-            @PathVariable Long postId) {
-
+            @PathVariable Long postId
+    ) {
         postService.deletePost(httpServletRequest, postId);
-
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/list")
-    public ResponseEntity<PostListResponse> getPostsList(
+    public ResponseEntity<PostListResponse> getAllPosts(
             @RequestParam(defaultValue = "0") int page
     ) {
         Pageable pageable = PageRequest.of(page, 10);
         return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
+
 }

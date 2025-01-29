@@ -6,11 +6,11 @@ import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
+import friendy.community.domain.post.dto.response.FindPostResponse;
 import friendy.community.domain.post.dto.response.PostListResponse;
-import friendy.community.domain.post.dto.response.PostSummaryResponse;
 import friendy.community.domain.post.model.Post;
+import friendy.community.domain.post.repository.PostQueryDSLRepository;
 import friendy.community.domain.post.repository.PostRepository;
-import friendy.community.domain.post.repository.interfaces.PostQueryRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final PostQueryRepository postQueryRepository;
+    private final PostQueryDSLRepository postQueryDSLRepository;
     private final JwtTokenExtractor jwtTokenExtractor;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
@@ -65,17 +65,15 @@ public class PostService {
 
     public PostListResponse getAllPosts(Pageable pageable) {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
-        Page<PostSummaryResponse> postSummaryPage = postQueryRepository.findAllPostsWithMember(defaultPageable);
+        Page<Post> postPage = postQueryDSLRepository.findAllPosts(defaultPageable);
 
-        validatePageNumber(defaultPageable.getPageNumber(), postSummaryPage);
+        List<FindPostResponse> findPostResponses = postPage.getContent().stream()
+                .map(FindPostResponse::from)
+                .toList();
 
-        return new PostListResponse(
-                mapToPostSummaryList(postSummaryPage),
-                postSummaryPage.getNumber(),
-                postSummaryPage.getTotalPages(),
-                postSummaryPage.getTotalElements()
-        );
+        return new PostListResponse(findPostResponses, postPage.getTotalPages());
     }
+
 
     private Post validatePostExistence(Long postId) {
         return postRepository.findById(postId)
@@ -98,21 +96,6 @@ public class PostService {
         final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
         final String email = jwtTokenProvider.extractEmailFromAccessToken(accessToken);
         return authService.getMemberByEmail(email);
-    }
-
-    private List<PostSummaryResponse> mapToPostSummaryList(Page<PostSummaryResponse> postSummaryPage) {
-
-        return postSummaryPage.getContent().stream()
-            .map(postSummaryResponse -> new PostSummaryResponse(
-                postSummaryResponse.id(),
-                postSummaryResponse.content(),
-                postSummaryResponse.createdAt(),
-                postSummaryResponse.likeCount(),
-                postSummaryResponse.commentCount(),
-                postSummaryResponse.shareCount(),
-                postSummaryResponse.authorResponse()
-            ))
-            .toList();
     }
 
 }
