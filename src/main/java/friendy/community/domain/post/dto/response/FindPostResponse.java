@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 public record FindPostResponse(
         Long id,
         String content,
-        LocalDateTime createdAt,
+        String createdAt,
         int likeCount,
         int commentCount,
         int shareCount,
@@ -18,11 +18,17 @@ public record FindPostResponse(
         return new FindPostResponse(
                 post.getId(),
                 post.getContent(),
-                post.getCreatedDate(),
+                formatDateTime(post.getCreatedDate()),
                 post.getLikeCount(),
                 post.getCommentCount(),
                 post.getShareCount(),
                 FindMemberResponse.from(post.getMember())
         );
+    }
+
+    private static String formatDateTime(LocalDateTime dateTime) {
+        return dateTime != null
+                ? dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                : null;
     }
 }
