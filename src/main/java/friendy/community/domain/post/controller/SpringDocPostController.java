@@ -2,7 +2,7 @@ package friendy.community.domain.post.controller;
 
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
-import friendy.community.domain.post.dto.response.PostListResponse;
+import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.global.swagger.error.ApiErrorResponse;
 import friendy.community.global.swagger.error.ErrorCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,7 +79,7 @@ public interface SpringDocPostController {
     @ApiErrorResponse(status = HttpStatus.NOT_FOUND, instance = "/posts/list", errorCases = {
         @ErrorCase(description = "요청한 페이지가 존재하지 않음", exampleMessage = "요청한 페이지가 존재하지 않습니다.")
     })
-    ResponseEntity<PostListResponse> getAllPosts(
+    ResponseEntity<FindAllPostResponse> getAllPosts(
             @RequestParam(defaultValue = "0") int page
     );
 

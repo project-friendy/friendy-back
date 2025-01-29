@@ -7,7 +7,7 @@ import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindPostResponse;
-import friendy.community.domain.post.dto.response.PostListResponse;
+import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostQueryDSLRepository;
 import friendy.community.domain.post.repository.PostRepository;
@@ -63,7 +63,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public PostListResponse getAllPosts(Pageable pageable) {
+    public FindAllPostResponse getAllPosts(Pageable pageable) {
         Pageable defaultPageable = PageRequest.of(pageable.getPageNumber(), 10);
         Page<Post> postPage = postQueryDSLRepository.findAllPosts(defaultPageable);
 
@@ -72,7 +72,7 @@ public class PostService {
                 .map(FindPostResponse::from)
                 .toList();
 
-        return new PostListResponse(findPostResponses, postPage.getTotalPages());
+        return new FindAllPostResponse(findPostResponses, postPage.getTotalPages());
     }
 
     private Post validatePostExistence(Long postId) {
