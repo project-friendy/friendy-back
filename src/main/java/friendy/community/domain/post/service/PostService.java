@@ -3,6 +3,7 @@ package friendy.community.domain.post.service;
 import friendy.community.domain.auth.jwt.JwtTokenExtractor;
 import friendy.community.domain.auth.jwt.JwtTokenProvider;
 import friendy.community.domain.auth.service.AuthService;
+import friendy.community.domain.hashtag.service.HashtagService;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
@@ -33,24 +34,31 @@ public class PostService {
     private final JwtTokenExtractor jwtTokenExtractor;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthService authService;
+    private final HashtagService hashtagService;
 
     public long savePost(final PostCreateRequest postCreateRequest, final HttpServletRequest httpServletRequest) {
         final Member member = getMemberFromRequest(httpServletRequest);
         final Post post = Post.of(postCreateRequest, member);
-
         postRepository.save(post);
+
+        hashtagService.saveHashtags(post, postCreateRequest.hashtags());
 
         return post.getId();
     }
 
-    public long updatePost(final PostUpdateRequest postUpdateRequest,
-                           final HttpServletRequest httpServletRequest,final Long postId) {
+    public long updatePost(
+            final PostUpdateRequest postUpdateRequest,
+            final HttpServletRequest httpServletRequest,
+            final Long postId
+    ) {
         final Member member = getMemberFromRequest(httpServletRequest);
         final Post post = validatePostExistence(postId);
         validatePostAuthor(member,post);
-        post.updatePost(postUpdateRequest);
 
+        post.updatePost(postUpdateRequest);
         postRepository.save(post);
+
+        hashtagService.updateHashtags(post, postUpdateRequest.hashtags());
 
         return post.getId();
     }
@@ -60,6 +68,7 @@ public class PostService {
         final Post post = validatePostExistence(postId);
         validatePostAuthor(member,post);
 
+        hashtagService.deleteHashtags(postId);
         postRepository.delete(post);
     }
 
