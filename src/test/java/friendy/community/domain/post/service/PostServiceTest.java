@@ -9,6 +9,7 @@ import friendy.community.domain.post.dto.request.PostCreateRequest;
 import friendy.community.domain.post.dto.request.PostUpdateRequest;
 import friendy.community.domain.post.dto.response.FindAllPostResponse;
 import friendy.community.domain.post.dto.response.FindPostResponse;
+import friendy.community.domain.post.fixture.PostFixture;
 import friendy.community.domain.post.model.Post;
 import friendy.community.domain.post.repository.PostRepository;
 import friendy.community.global.exception.ErrorCode;
@@ -67,8 +68,9 @@ class PostServiceTest {
         entityManager.createNativeQuery("ALTER TABLE post AUTO_INCREMENT = 1").executeUpdate();
     }
 
-    private Long createPost(String content, List<String> hashtags) {
-        return postService.savePost(new PostCreateRequest(content, hashtags), httpServletRequest);
+    private Long createPost() {
+        Post post = PostFixture.postFixture();
+        return postService.savePost(new PostCreateRequest(post.getContent(), List.of("프렌디", "개발", "스터디")), httpServletRequest);
     }
 
     private void signUpOtherUser() {
@@ -82,7 +84,7 @@ class PostServiceTest {
     @DisplayName("게시글 생성 성공 시 게시글 ID 반환")
     void createPostSuccessfullyReturnsPostId() {
         // Given & When
-        Long postId = createPost("This is a new post content.", List.of("프렌디", "개발", "스터디"));
+        Long postId = createPost();
 
         // Then
         assertThat(postId).isEqualTo(1L);
@@ -95,7 +97,7 @@ class PostServiceTest {
         memberRepository.deleteAll();
 
         // When & Then
-        assertThatThrownBy(() -> createPost("This is a new post content.", List.of("프렌디", "개발", "스터디")))
+        assertThatThrownBy(this::createPost)
                 .isInstanceOf(FriendyException.class)
                 .hasMessageContaining("해당 이메일의 회원이 존재하지 않습니다.")
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.UNAUTHORIZED_EMAIL);
@@ -105,7 +107,7 @@ class PostServiceTest {
     @DisplayName("게시글 수정 성공 시 게시글 ID 반환")
     void updatePostSuccessfullyReturnsPostId() {
         // Given
-        createPost("This is content", List.of("프렌디", "개발", "스터디"));
+        createPost();
         PostUpdateRequest request = new PostUpdateRequest("Updated content", List.of("업데이트"));
 
         // When
@@ -135,7 +137,7 @@ class PostServiceTest {
     @DisplayName("게시글 작성자가 아닌 사용자가 수정 시 예외 발생")
     void throwsExceptionWhenNotPostAuthorOnUpdate() {
         // Given
-        createPost("This is content", List.of("프렌디", "개발", "스터디"));
+        createPost();
 
         // When
         signUpOtherUser();
@@ -152,7 +154,7 @@ class PostServiceTest {
     @DisplayName("게시글 삭제 성공")
     void deletePostSuccessfullyDeletesPost() {
         // Given
-        createPost("This is content", List.of("프렌디", "개발", "스터디"));
+        createPost();
 
         // When
         postService.deletePost(httpServletRequest, 1L);
@@ -175,7 +177,7 @@ class PostServiceTest {
     @DisplayName("게시글 작성자가 아닌 사용자가 삭제 시 예외 발생")
     void throwsExceptionWhenNotPostAuthorOnDelete() {
         // Given
-        createPost("This is content", List.of("프렌디", "개발", "스터디"));
+        createPost();
 
         // When
         signUpOtherUser();
@@ -191,14 +193,14 @@ class PostServiceTest {
     @DisplayName("게시글 조회 요청이 성공적으로 수행되면 FindPostResponse를 리턴한다")
     void getPostSuccessfullyReturnsFindPostResponse() {
         // Given
-        createPost("This is a post content", List.of("프렌디", "개발", "스터디"));
+        createPost();
 
         // When
         FindPostResponse response = postService.getPost(1L);
 
         // Then
         assertThat(response).isNotNull();
-        assertThat(response.content()).isEqualTo("This is a post content");
+        assertThat(response.content()).isEqualTo("This is a sample post content.");
     }
 
     @Test
@@ -214,8 +216,8 @@ class PostServiceTest {
     @DisplayName("게시글 목록 조회 성공")
     void getAllPostsSuccessfullyReturnsFindAllPostResponse() {
         // Given
-        createPost("This is content 1", List.of("프렌디", "개발", "스터디"));
-        createPost("This is content 2", List.of("프렌디2", "개발2", "스터디2"));
+        createPost();
+        createPost();
 
         // When
         FindAllPostResponse response = postService.getAllPosts(PageRequest.of(0, 10));
@@ -223,7 +225,7 @@ class PostServiceTest {
         // Then
         assertThat(response).isNotNull();
         assertThat(response.posts()).extracting("content")
-                .containsExactlyInAnyOrder("This is content 1", "This is content 2");
+                .containsExactlyInAnyOrder("This is a sample post content.", "This is a sample post content.");
     }
 
     @Test
@@ -236,4 +238,3 @@ class PostServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_NOT_FOUND);
     }
 }
-
