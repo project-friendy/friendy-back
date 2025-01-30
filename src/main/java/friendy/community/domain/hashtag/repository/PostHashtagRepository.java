@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostHashtagRepository extends JpaRepository<PostHashtag, Long> {
+
+    void deleteAllByPostId(Long postId);
 }
