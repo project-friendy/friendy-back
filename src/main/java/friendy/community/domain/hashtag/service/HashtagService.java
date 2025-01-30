@@ -30,6 +30,11 @@ public class HashtagService {
         savePostHashtags(post, existTags);
     }
 
+    public void updateHashtags(Post post, List<String> hashtags) {
+        deleteHashtags(post.getId());
+        saveHashtags(post, hashtags);
+    }
+
     public void deleteHashtags(Long postId) {
         postHashtagRepository.deleteAllByPostId(postId);
     }
