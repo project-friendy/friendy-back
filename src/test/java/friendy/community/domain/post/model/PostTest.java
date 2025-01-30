@@ -1,6 +1,5 @@
 package friendy.community.domain.post.model;
 
-import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.fixture.MemberFixture;
 import friendy.community.domain.member.model.Member;
 import friendy.community.domain.post.dto.request.PostCreateRequest;
@@ -8,9 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,17 +20,16 @@ class PostTest {
 
     @BeforeEach
     void setUp() {
-
         member = MemberFixture.memberFixture();
-
     }
 
     @Test
-    @DisplayName("Post 객체가 생성되는지에 대한 test")
+    @DisplayName("Post 객체가 요청을 기반으로 생성되는지 테스트")
     void ofMethodCreatesPostFromRequest() {
         // Given
         String content = "This is a new post content.";
-        PostCreateRequest postCreateRequest = new PostCreateRequest(content);
+        List<String> hashtags = List.of("프렌디", "개발", "스터디");
+        PostCreateRequest postCreateRequest = new PostCreateRequest(content, hashtags);
 
         // When
         Post post = Post.of(postCreateRequest, member);
@@ -41,6 +38,6 @@ class PostTest {
         assertNotNull(post);
         assertEquals(content, post.getContent());
         assertEquals(member, post.getMember());
-
     }
 }
+
