@@ -30,6 +30,10 @@ public class HashtagService {
         savePostHashtags(post, existTags);
     }
 
+    public void deleteHashtags(Long postId) {
+        postHashtagRepository.deleteAllByPostId(postId);
+    }
+
     private List<String> getExistHashtagNames(List<Hashtag> existTags) {
         return existTags.stream()
                 .map(Hashtag::getName)
