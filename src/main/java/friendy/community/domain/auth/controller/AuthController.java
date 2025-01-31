@@ -61,7 +61,6 @@ public class AuthController implements SpringDocAuthController{
             HttpServletRequest httpServletRequest
     ) {
         final String accessToken = jwtTokenExtractor.extractAccessToken(httpServletRequest);
-        final String refreshToken = jwtTokenExtractor.extractRefreshToken(httpServletRequest);
         authService.withdrawal(accessToken);
 
         return ResponseEntity.ok()
