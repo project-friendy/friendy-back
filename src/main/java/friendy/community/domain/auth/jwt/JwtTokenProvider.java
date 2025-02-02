@@ -101,7 +101,7 @@ public class JwtTokenProvider {
 
     private void validateUserAuthorization(final String email) {
         if (Boolean.FALSE.equals(redisTemplate.hasKey(email))) {
-            final String logMessage = "로그인 상태가 아닌 사용자";
+            final String logMessage = "로그인 되어있지 않은 사용자입니다.";
             throw new FriendyException(ErrorCode.UNAUTHORIZED_USER, logMessage);
         }
     }
