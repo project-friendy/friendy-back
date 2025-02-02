@@ -307,8 +307,7 @@ class AuthControllerTest {
 
         // When & Then
         mockMvc.perform(post("/auth/withdrawal")
-                        .header("Authorization", accessToken)
-                        .header("Authorization-Refresh", refreshToken))
+                        .header("Authorization", accessToken))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
