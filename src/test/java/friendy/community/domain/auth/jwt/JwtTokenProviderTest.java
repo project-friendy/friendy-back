@@ -187,7 +187,7 @@ class JwtTokenProviderTest {
         // when & then
         assertThatThrownBy(() -> jwtTokenProvider.extractEmailFromRefreshToken(refreshToken))
                 .isInstanceOf(FriendyException.class)
-                .hasMessageContaining("로그인 상태가 아닌 사용자");
+                .hasMessageContaining("로그인 되어있지 않은 사용자입니다.");
     }
 
 }
