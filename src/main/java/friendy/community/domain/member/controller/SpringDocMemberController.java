@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "회원 API", description = "회원 API")
 public interface SpringDocMemberController {
@@ -32,7 +33,7 @@ public interface SpringDocMemberController {
             @ErrorCase(description = "이메일 중복", exampleMessage = "이미 가입된 이메일입니다."),
             @ErrorCase(description = "닉네임 중복", exampleMessage = "닉네임이 이미 존재합니다."),
     })
-    ResponseEntity<Void> signUp(MemberSignUpRequest request);
+    ResponseEntity<Void> signUp(MemberSignUpRequest request, MultipartFile multipartFile);
 
     @Operation(summary = "비밀번호 변경")
     @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공")
