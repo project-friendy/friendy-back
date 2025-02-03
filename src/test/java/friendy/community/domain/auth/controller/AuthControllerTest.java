@@ -197,15 +197,15 @@ class AuthControllerTest {
     @DisplayName("로그아웃이 성공적으로 처리되면 200 OK를 반환한다.")
     void logoutSuccessfullyReturns200Ok() throws Exception {
         // Given
-        String refreshToken = "Bearer refreshToken";
+        String accessToken = "Bearer accessToken";
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader("Authorization-Refresh", "Bearer refreshToken");
+        request.addHeader("Authorization", accessToken);
 
         when(jwtTokenExtractor.extractRefreshToken(any(HttpServletRequest.class)))
-                .thenReturn("refreshToken");
+                .thenReturn("accessToken");
 
         mockMvc.perform(post("/auth/logout")
-                        .header("Authorization-Refresh", refreshToken))
+                        .header("Authorization", accessToken))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -303,7 +303,6 @@ class AuthControllerTest {
     void withdrawalSuccessfullyReturns200() throws Exception {
         // Given
         String accessToken = "Bearer validAccessToken";
-        String refreshToken = "Bearer validRefreshToken";
 
         // When & Then
         mockMvc.perform(post("/auth/withdrawal")
