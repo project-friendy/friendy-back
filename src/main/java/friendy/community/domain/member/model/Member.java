@@ -31,17 +31,27 @@ public class Member {
     @Column(nullable = false)
     private LocalDate birthDate;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MemberImage memberImage;
+
     public void resetPassword(final String password, final String salt) {
         this.password = password;
         this.salt = salt;
     }
 
-    public Member(final String email, final String nickname, final String encryptedPassword, final String salt, final LocalDate birthDate) {
-        this(null, email, nickname, encryptedPassword, salt, birthDate);
+    public void setMemberImage(MemberImage memberImage) {
+        this.memberImage = memberImage;
+    }
+
+    public Member(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
+        this.email = request.email();
+        this.nickname = request.nickname();
+        this.password = encryptedPassword;
+        this.birthDate = request.birthDate();
     }
 
     public static Member of(final MemberSignUpRequest request, final String encryptedPassword, final String salt) {
-        return new Member(request.email(), request.nickname(), encryptedPassword, salt, request.birthDate());
+        return new Member(request, encryptedPassword, salt);
     }
 
     public boolean matchPassword(String password) {
