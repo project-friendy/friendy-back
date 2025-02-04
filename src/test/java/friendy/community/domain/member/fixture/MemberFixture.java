@@ -1,5 +1,6 @@
 package friendy.community.domain.member.fixture;
 
+import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import friendy.community.domain.member.encryption.PasswordEncryptor;
 import friendy.community.domain.member.encryption.SHA2PasswordEncryptor;
 import friendy.community.domain.member.model.Member;
@@ -12,13 +13,12 @@ public class MemberFixture {
 
     public static Member memberFixture() {
         String encrypted = passwordEncryptor.encrypt(getFixturePlainPassword(), "salt");
-        return new Member(
-                "example@friendy.com",
-                "bokSungKim",
-                encrypted,
-                "salt",
-                LocalDate.parse("2002-08-13")
-        );
+        MemberSignUpRequest request = new MemberSignUpRequest(
+            "example@friendy.com",
+            "bokSungKim",
+            "password123!",
+            LocalDate.parse("2002-08-13"));
+        return new Member(request,encrypted,"salt");
     }
 
     public static String getFixturePlainPassword() {
