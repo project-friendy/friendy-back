@@ -19,8 +19,8 @@ public class MemberController implements SpringDocMemberController{
     private final MemberService memberService;
 
     @PostMapping(value = "/signup", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Void> signUp(@RequestPart(value = "request") MemberSignUpRequest request,
-                                       @RequestPart(value = "file") MultipartFile multipartFile) {
+    public ResponseEntity<Void> signUp(@Valid @RequestPart(value = "request") MemberSignUpRequest request,
+                                       @RequestPart(value = "image", required = false) MultipartFile multipartFile) {
         return ResponseEntity.created(URI.create("/users/" + memberService.signUp(request,multipartFile))).build();
     }
 
