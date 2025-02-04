@@ -1,5 +1,6 @@
 package friendy.community.domain.member.model;
 
+import friendy.community.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,15 +8,11 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class MemberImage {
+public class MemberImage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
     @Column(nullable = false)
     private String imageUrl;
@@ -26,15 +23,14 @@ public class MemberImage {
     @Column(nullable = false)
     private String fileType;
 
-    public MemberImage(Member member, String imageUrl, String storedFileName, String fileType) {
-        this.member = member;
+    public MemberImage(String imageUrl, String storedFileName, String fileType) {
         this.imageUrl = imageUrl;
         this.storedFileName = storedFileName;
         this.fileType = fileType;
     }
 
-    public static MemberImage of(Member member, String imageUrl, String storedFileName, String fileType) {
-        return new MemberImage(member, imageUrl, storedFileName, fileType);
+    public static MemberImage of(String imageUrl, String storedFileName, String fileType) {
+        return new MemberImage(imageUrl, storedFileName, fileType);
     }
 
     public void updateImage(String imageUrl, String storedFileName, String fileType) {
