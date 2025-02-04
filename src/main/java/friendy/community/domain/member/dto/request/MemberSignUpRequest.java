@@ -27,6 +27,5 @@ public record MemberSignUpRequest(
         @Schema(description = "생년월일", example = "2002-08-13")
         @NotNull(message = "생년월일이 입력되지 않았습니다.")
         LocalDate birthDate
-
     ) {
 }

@@ -42,7 +42,7 @@ class MemberServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(member.getEmail(), member.getNickname(), member.getPassword(), member.getBirthDate());
 
         // When
-        Long savedId = memberService.signUp(memberSignUpRequest);
+        Long savedId = memberService.signUp(memberSignUpRequest,null);
         Optional<Member> actualMember = memberRepository.findById(savedId);
 
         // Then

@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
@@ -23,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -49,18 +51,20 @@ class MemberControllerTest {
     @DisplayName("회원가입 요청이 성공적으로 처리되면 201 Created와 함께 응답을 반환한다")
     void signUpSuccessfullyReturns201Created() throws Exception {
         // given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        MemberSignUpRequest request = new MemberSignUpRequest("example@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
 
-        // Mock Service
-        when(memberService.signUp(any(MemberSignUpRequest.class))).thenReturn(1L);
+        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class))).thenReturn(1L); // 1L은 새로 생성된 회원의 ID
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
-            .andDo(print())
-            .andExpect(status().isCreated())
-            .andExpect(header().string("Location", "/users/1"));
+        // MockMvc를 사용하여 multipart 요청을 보내고, 응답을 검증
+        // MockMvc를 사용하여 multipart 요청을 보내고, 응답을 검증
+        mockMvc.perform(multipart("/signup")
+                .file("image", new byte[0]) // 빈 파일 첨부
+                .param("request", objectMapper.writeValueAsString(request)) // JSON 형식으로 request 파라미터 전송
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)) // MULTIPART_FORM_DATA_VALUE 설정
+            .andExpect(status().isCreated()) // 응답 상태 코드가 201 (Created)이어야 함
+            .andExpect(header().string("Location", "/users/1")); // Location 헤더에 "/users/1"이 포함되어야 함
+
     }
 
     @Test
@@ -98,7 +102,7 @@ class MemberControllerTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("duplicate@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
 
         // Mock Service
-        when(memberService.signUp(any(MemberSignUpRequest.class)))
+        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
 
         // When & Then
@@ -155,7 +159,7 @@ class MemberControllerTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "duplicateNickname", "password123!", LocalDate.parse("2002-08-13"));
 
         // Mock Service
-        when(memberService.signUp(any(MemberSignUpRequest.class)))
+        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다."));
 
         // When & Then

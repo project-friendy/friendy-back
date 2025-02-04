@@ -65,7 +65,7 @@ class PostServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
                 member.getEmail(), member.getNickname(), member.getPassword(), member.getBirthDate()
         );
-        memberService.signUp(memberSignUpRequest);
+        memberService.signUp(memberSignUpRequest,null);
 
         resetPostIdSequence();
     }
@@ -157,7 +157,7 @@ class PostServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
                 "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
         );
-        memberService.signUp(memberSignUpRequest);
+        memberService.signUp(memberSignUpRequest,null);
 
         httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
@@ -206,7 +206,7 @@ class PostServiceTest {
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
             "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
         );
-        memberService.signUp(memberSignUpRequest);
+        memberService.signUp(memberSignUpRequest,null);
 
         httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);

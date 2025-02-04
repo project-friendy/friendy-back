@@ -37,9 +37,9 @@ public class MemberService {
         if (image != null && !image.isEmpty()) {
             try {
                 imageUrl = s3service.upload(image, "profile");
-                String storedFileName = s3service.generateStoredFileName(image);
+                String storedFileName = s3service.generateStoredFileName(image, "profile");
                 String fileType = s3service.getFileType(image);
-                final MemberImage memberImage = MemberImage.of(member, imageUrl, storedFileName, fileType);
+                final MemberImage memberImage = MemberImage.of(imageUrl, storedFileName, fileType);
                 member.setMemberImage(memberImage);
             } catch (Exception e) {
                 throw new RuntimeException("이미지 업로드 실패", e);
