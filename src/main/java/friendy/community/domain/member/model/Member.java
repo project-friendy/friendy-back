@@ -1,5 +1,6 @@
 package friendy.community.domain.member.model;
 
+import friendy.community.domain.common.BaseEntity;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +32,8 @@ public class Member {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "member_image_id")
     private MemberImage memberImage;
 
     public void resetPassword(final String password, final String salt) {
@@ -47,6 +49,7 @@ public class Member {
         this.email = request.email();
         this.nickname = request.nickname();
         this.password = encryptedPassword;
+        this.salt = salt;
         this.birthDate = request.birthDate();
     }
 
