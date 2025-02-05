@@ -14,14 +14,19 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
+import static friendy.community.domain.member.fixture.MemberFixture.createImageFile;
+import static friendy.community.domain.member.fixture.MemberFixture.createJsonRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -51,32 +56,34 @@ class MemberControllerTest {
     @DisplayName("회원가입 요청이 성공적으로 처리되면 201 Created와 함께 응답을 반환한다")
     void signUpSuccessfullyReturns201Created() throws Exception {
         // given
-        MemberSignUpRequest request = new MemberSignUpRequest("example@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class))).thenReturn(1L); // 1L은 새로 생성된 회원의 ID
+        given(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class))).willReturn(1L);
 
         // When & Then
-        // MockMvc를 사용하여 multipart 요청을 보내고, 응답을 검증
-        // MockMvc를 사용하여 multipart 요청을 보내고, 응답을 검증
-        mockMvc.perform(multipart("/signup")
-                .file("image", new byte[0]) // 빈 파일 첨부
-                .param("request", objectMapper.writeValueAsString(request)) // JSON 형식으로 request 파라미터 전송
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)) // MULTIPART_FORM_DATA_VALUE 설정
-            .andExpect(status().isCreated()) // 응답 상태 코드가 201 (Created)이어야 함
-            .andExpect(header().string("Location", "/users/1")); // Location 헤더에 "/users/1"이 포함되어야 함
-
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
+            .andExpect(status().isCreated())
+            .andExpect(header().string("Location", "/users/1"));
     }
 
     @Test
     @DisplayName("이메일이 없으면 400 Bad Request를 반환한다")
     void signUpWithoutEmailReturns400BadRequest() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(null, "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
@@ -85,12 +92,15 @@ class MemberControllerTest {
     @DisplayName("이메일 형식이 올바르지 않으면 400 Bad Request를 반환한다")
     void signUpWithInvalidEmailReturns400BadRequest() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("invalid-email", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("invalid-email", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
@@ -99,33 +109,39 @@ class MemberControllerTest {
     @DisplayName("이메일이 중복되면 409 Conflict를 반환한다")
     void signUpWithDuplicateEmailReturns409Conflict() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("duplicate@friendy.com", "bokSungKim", "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        // Mock Service
         when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isConflict())
             .andExpect(result ->
                 assertThat(result.getResolvedException().getMessage())
                     .contains("이미 가입된 이메일입니다."));
+
     }
 
     @Test
     @DisplayName("닉네임이 없으면 400 Bad Request를 반환한다")
     void signUpWithoutNicknameReturns400BadRequest() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", null, "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
@@ -139,33 +155,37 @@ class MemberControllerTest {
     void signUpWithInvalidNicknameLengthReturns400BadRequest(
         String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
-        MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", nickname, "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(result ->
-                assertThat(result.getResolvedException().getMessage())
-                    .contains(expectedMessage));
+                assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
     }
 
     @Test
     @DisplayName("닉네임이 중복되면 409 Conflict를 반환한다")
     void signUpWithDuplicateNicknameReturns409Conflict() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "duplicateNickname", "password123!", LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "duplicateNickname", "password123!",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        // Mock Service
         when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다."));
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isConflict())
             .andExpect(result ->
@@ -177,12 +197,15 @@ class MemberControllerTest {
     @DisplayName("비밀번호가 없으면 400 Bad Request를 반환한다")
     void signUpWithoutPasswordReturns400BadRequest() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "bokSungKim", null, LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "Nickname", "",  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
@@ -197,12 +220,15 @@ class MemberControllerTest {
     void signUpWithInvalidPasswordPatternReturns400BadRequest(
         String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
-        MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest(email, nickname, password,  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(result ->
@@ -218,29 +244,34 @@ class MemberControllerTest {
     void signUpWithInvalidPasswordLengthReturns400BadRequest(
         String email, String nickname, String password, String expectedMessage) throws Exception {
         // Given
-        MemberSignUpRequest request = new MemberSignUpRequest(email, nickname, password, LocalDate.parse("2002-08-13"));
+        MockMultipartFile requestPart = createJsonRequest(email, nickname, password,  LocalDate.parse("2002-08-13"));
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(result ->
-                assertThat(result.getResolvedException().getMessage())
-                    .contains(expectedMessage));
+                assertThat(result.getResolvedException().getMessage()).contains(expectedMessage));
     }
 
     @Test
     @DisplayName("생년월일이 없으면 400 Bad Request를 반환한다")
     void signUpWithoutBirthDateReturns400BadRequest() throws Exception {
         // Given
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest("example@friendy.com", "bokSungKim", "password123!", null);
+        MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "Nickname", "password123!", null);
+        MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
         // When & Then
-        mockMvc.perform(post("/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(memberSignUpRequest)))
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
+                .file(requestPart)
+                .file(imageFile)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8"))
             .andDo(print())
             .andExpect(status().isBadRequest());
     }
