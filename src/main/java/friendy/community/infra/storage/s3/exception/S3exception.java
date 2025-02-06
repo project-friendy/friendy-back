@@ -23,7 +23,7 @@ public class S3exception {
     private void validateMimeType(MultipartFile multipartFile) {
         String contentType = multipartFile.getContentType();
         if (contentType != null && !isAllowedMimeType(contentType)) {
-            throw new FriendyException(ErrorCode.INVALID_FILE, "지원되지 않는 파일 확장자입니다.");
+            throw new FriendyException(ErrorCode.INVALID_FILE, "지원되지 않는 파일 형식입니다.");
         }
     }
 
@@ -37,7 +37,7 @@ public class S3exception {
 
         // 파일 이름이 null인지 먼저 확인
         if (fileName == null || fileName.isEmpty()) {
-            throw new FriendyException(ErrorCode.INVALID_FILE, "파일 이름이 없거나 확장자가 없습니다.");
+            throw new FriendyException(ErrorCode.INVALID_FILE, "파일 이름이 없습니다.");
         }
 
         if (!fileName.contains(".")) {
