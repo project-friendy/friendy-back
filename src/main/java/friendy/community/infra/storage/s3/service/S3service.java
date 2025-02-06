@@ -1,10 +1,10 @@
-package friendy.community.domain.common;
+package friendy.community.infra.storage.s3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
+import friendy.community.infra.storage.s3.exception.S3exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,28 +14,26 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class  S3service {
+public class S3service {
     private final AmazonS3 s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private static final long MAX_FILE_SIZE = 1024 * 1024;
 
-    public String upload(MultipartFile multipartFile, String dirName) throws IOException {
+    private final S3exception s3exception;
 
-        validateFile(multipartFile);
+    public String upload(MultipartFile multipartFile, String dirName) {
+
+        s3exception.validateFile(multipartFile);
 
         // (1) MultipartFile을 File로 변환
-        File uploadFile = convert(multipartFile)
-            .orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File 전환에 실패했습니다."));
+        File uploadFile = convert(multipartFile);
 
         // (2) 파일 이름 중복을 방지하기 위해 UUID 값으로 설정(현재 DB의 길이 제한으로 UUID값만 저장하도록 해두었다. 필요에 따라 수정 예정)
         String randomName = UUID.randomUUID().toString();
@@ -49,19 +47,27 @@ public class  S3service {
         }
     }
 
-    private Optional<File> convert(MultipartFile file) throws IOException {
-        // 임시 경로에 file을 생성한다.
-        File convertFile = new File(System.getProperty("java.io.tmpdir"), file.getOriginalFilename());
+    private File convert(MultipartFile file) {
+        try {
+            // 임시 경로에 파일 생성
+            File convertFile = new File(System.getProperty("java.io.tmpdir"), file.getOriginalFilename());
 
-        // MultipartFile의 내용을 convertFile에 작성한다.
-        if (convertFile.createNewFile()) {
+            // 파일 생성 실패 시 예외 발생
+            if (!convertFile.createNewFile()) {
+                throw new FriendyException(ErrorCode.INVALID_FILE, "파일 생성에 실패했습니다.");
+            }
+
+            // 파일에 데이터 쓰기
             try (FileOutputStream fos = new FileOutputStream(convertFile)) {
                 fos.write(file.getBytes());
             }
-            return Optional.of(convertFile);
+            return convertFile;
+
+        } catch (IOException e) {
+            throw new FriendyException(ErrorCode.FILE_IO_ERROR, "I/O 오류 발생");
         }
-        return Optional.empty();
     }
+
 
     private String putS3(File uploadFile, String fileName) {
         // S3에 파일을 업로드한다.
@@ -101,20 +107,5 @@ public class  S3service {
         } else {
             log.info("파일이 삭제되지 못했습니다.");
         }
-    }
-
-    public void validateFile(MultipartFile multipartFile) {
-        String contentType = multipartFile.getContentType();
-        if (contentType != null && !isAllowedMimeType(contentType)) {
-            throw new FriendyException(ErrorCode.INVALID_REQUEST, "지원되지 않는 파일 확장자입니다.");
-        }
-
-        if (multipartFile.getSize() > MAX_FILE_SIZE) {
-            throw new FriendyException(ErrorCode.INVALID_REQUEST, "파일 크기가 허용된 범위를 초과했습니다.");
-        }
-    }
-
-    private boolean isAllowedMimeType(String contentType) {
-        return List.of("image/jpeg", "image/png", "image/gif").contains(contentType);
     }
 }
