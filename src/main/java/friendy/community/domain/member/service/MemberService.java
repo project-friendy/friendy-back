@@ -1,6 +1,5 @@
 package friendy.community.domain.member.service;
 
-import friendy.community.domain.common.S3service;
 import friendy.community.domain.member.dto.request.PasswordRequest;
 import friendy.community.domain.auth.service.AuthService;
 import friendy.community.domain.member.dto.request.MemberSignUpRequest;
@@ -11,6 +10,7 @@ import friendy.community.domain.member.model.MemberImage;
 import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
+import friendy.community.infra.storage.s3.service.S3service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
