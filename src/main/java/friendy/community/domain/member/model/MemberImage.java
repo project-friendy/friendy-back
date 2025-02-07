@@ -18,14 +18,14 @@ public class MemberImage extends BaseEntity {
     private String imageUrl;
 
     @Column(nullable = false)
-    private String storedFileName;
+    private String s3Key;
 
     @Column(nullable = false)
     private String fileType;
 
-    public MemberImage(String imageUrl, String storedFileName, String fileType) {
+    public MemberImage(String imageUrl, String s3Key, String fileType) {
         this.imageUrl = imageUrl;
-        this.storedFileName = storedFileName;
+        this.s3Key = s3Key;
         this.fileType = fileType;
     }
 
@@ -35,7 +35,7 @@ public class MemberImage extends BaseEntity {
 
     public void updateImage(String imageUrl, String storedFileName, String fileType) {
         this.imageUrl = imageUrl;
-        this.storedFileName = storedFileName;
+        this.s3Key = storedFileName;
         this.fileType = fileType;
     }
 
