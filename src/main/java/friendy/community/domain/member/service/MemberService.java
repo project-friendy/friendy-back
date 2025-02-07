@@ -27,26 +27,20 @@ public class MemberService {
     private final AuthService authService;
     private final S3service s3service;
 
-    public Long signUp(MemberSignUpRequest request, MultipartFile image) {
+    public Long signUp(MemberSignUpRequest request) {
         validateUniqueMemberAttributes(request);
         final String salt = saltGenerator.generate();
         final String encryptedPassword = passwordEncryptor.encrypt(request.password(), salt);
-        String imageUrl = "default-profile-image-url";
         Member member = new Member(request, encryptedPassword, salt);
 
-        if (image != null && !image.isEmpty()) {
-            try {
-                imageUrl = s3service.upload(image, "profile");
-                String storedFileName = s3service.generateStoredFileName(image, "profile");
-                String fileType = s3service.getFileType(image);
-                final MemberImage memberImage = MemberImage.of(imageUrl, storedFileName, fileType);
-                member.setMemberImage(memberImage);
-            } catch (Exception e) {
-                throw new RuntimeException("이미지 업로드 실패", e);
-            }
+        if (request.imageUrl() != null) {
+            s3service.moveS3Object(request.imageUrl(), "profile");
+            String StoredFileName = request.imageUrl().substring(
+                request.imageUrl().lastIndexOf("/") -1);
+            MemberImage memberImage = MemberImage.of(request.imageUrl(),StoredFileName, s3service.getContentTypeFromS3(StoredFileName));
+            member.setMemberImage(memberImage);
         }
         memberRepository.save(member);
-
         return member.getId();
     }
 
