@@ -1,7 +1,11 @@
 package friendy.community.infra.storage.s3.service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
@@ -14,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.UUID;
 
 @Service
@@ -35,13 +41,9 @@ public class S3service {
         // (1) MultipartFile을 File로 변환
         File uploadFile = convert(multipartFile);
 
-        // (2) 파일 이름 중복을 방지하기 위해 UUID 값으로 설정(현재 DB의 길이 제한으로 UUID값만 저장하도록 해두었다. 필요에 따라 수정 예정)
-        String randomName = UUID.randomUUID().toString();
-        String fileName = dirName + "/" + randomName;
-
         // (3)S3에 파일을 업로드. 업로드 완료 여부와 관계 없이 (1)에서 임시 경로에 생성된 파일을 삭제
         try {
-            return putS3(uploadFile, fileName);
+             return putS3(uploadFile, generateStoredFileName(multipartFile,dirName));
         } finally {
             removeNewFile(uploadFile);
         }
@@ -76,7 +78,7 @@ public class S3service {
         return s3Client.getUrl(bucket, fileName).toString();
     }
 
-    public String generateStoredFileName(MultipartFile multipartFile,String dirName) {
+    public String generateStoredFileName(MultipartFile multipartFile, String dirName) {
         // MultipartFile에서 원본 파일 이름을 가져오기
         String originalFileName = multipartFile.getOriginalFilename();
 
@@ -101,6 +103,7 @@ public class S3service {
 
         return contentType;  // 예: image/jpeg, application/pdf
     }
+
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {
             log.info("파일이 삭제되었습니다.");
@@ -108,4 +111,45 @@ public class S3service {
             log.info("파일이 삭제되지 못했습니다.");
         }
     }
+
+    public void moveS3Object(String imageUrl, String newDirName) {
+        String oldKey = extractFileName(imageUrl);
+
+        // 2. 새 경로로 객체 키 생성
+        String fileName = oldKey.substring(oldKey.lastIndexOf("/") + 1); // 파일명만 추출
+        String newKey = newDirName + "/" + fileName; // 새로운 경로 생성
+
+        // 3. 객체 복사 (기존 위치 → 새 위치)
+        copyObject(bucket, oldKey, bucket, newKey);
+
+    }
+
+    public void copyObject(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey) {
+        CopyObjectRequest copyObjectRequest = new CopyObjectRequest(
+            sourceBucket, sourceKey,
+            destinationBucket, destinationKey);
+        s3Client.copyObject(copyObjectRequest);
+    }
+
+    public String extractFileName(String imageUrl) {
+        try {
+            URL url = new URL(imageUrl);  // URL 객체 생성
+            String path = url.getPath();  // "/profile/user123.jpg"
+            return path.startsWith("/") ? path.substring(1) : path;  // 첫 '/' 제거
+        } catch (MalformedURLException e) {  // MalformedURLException 사용
+            throw new FriendyException(ErrorCode.INVALID_FILE, "유효한 URL 형식이어야 합니다.");
+        }
+    }
+
+    public String getContentTypeFromS3(String key) {
+        try {
+            S3Object object = s3Client.getObject(new GetObjectRequest(bucket, key));
+            return object.getObjectMetadata().getContentType();
+        } catch (AmazonServiceException e) {
+            // 예외 처리 (더 구체적인 예외 처리 가능)
+            System.err.println("Error getting object metadata: " + e.getMessage());
+            return null;
+        }
+    }
 }
+
