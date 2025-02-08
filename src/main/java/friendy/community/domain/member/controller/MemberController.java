@@ -39,4 +39,5 @@ public class MemberController implements SpringDocMemberController{
     ) {
         return ResponseEntity.ok(memberService.getMember(httpServletRequest, memberId));
     }
+
 }
