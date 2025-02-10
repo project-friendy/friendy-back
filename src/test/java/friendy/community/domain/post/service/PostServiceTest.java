@@ -63,9 +63,9 @@ class PostServiceTest {
 
         member = MemberFixture.memberFixture();
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-                member.getEmail(), member.getNickname(), member.getPassword(), member.getBirthDate()
+                member.getEmail(), member.getNickname(), member.getPassword(), member.getBirthDate(),null
         );
-        memberService.signUp(memberSignUpRequest,null);
+        memberService.signUp(memberSignUpRequest);
 
         resetPostIdSequence();
     }
@@ -155,9 +155,9 @@ class PostServiceTest {
         postSetUp("This is content");
 
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-                "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
+                "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13"),null
         );
-        memberService.signUp(memberSignUpRequest,null);
+        memberService.signUp(memberSignUpRequest);
 
         httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
@@ -204,9 +204,9 @@ class PostServiceTest {
         postSetUp("This is content");
 
         MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-            "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13")
+            "user@example.com", "홍길동", "password123!", LocalDate.parse("2002-08-13"), null
         );
-        memberService.signUp(memberSignUpRequest,null);
+        memberService.signUp(memberSignUpRequest);
 
         httpServletRequest = new MockHttpServletRequest();
         httpServletRequest.addHeader("Authorization", OTHER_USER_TOKEN);
