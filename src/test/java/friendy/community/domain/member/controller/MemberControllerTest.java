@@ -59,7 +59,7 @@ class MemberControllerTest {
         MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
         MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        given(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class))).willReturn(1L);
+        given(memberService.signUp(any(MemberSignUpRequest.class))).willReturn(1L);
 
         // When & Then
         mockMvc.perform(MockMvcRequestBuilders.multipart("/signup")
@@ -112,7 +112,7 @@ class MemberControllerTest {
         MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "bokSungKim", "password123!",  LocalDate.parse("2002-08-13"));
         MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
+        when(memberService.signUp(any(MemberSignUpRequest.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_EMAIL, "이미 가입된 이메일입니다."));
 
         // When & Then
@@ -177,7 +177,7 @@ class MemberControllerTest {
         MockMultipartFile requestPart = createJsonRequest("example@friendy.com", "duplicateNickname", "password123!",  LocalDate.parse("2002-08-13"));
         MockMultipartFile imageFile = createImageFile("profile.jpg", "image/jpeg", new byte[0]);
 
-        when(memberService.signUp(any(MemberSignUpRequest.class), any(MultipartFile.class)))
+        when(memberService.signUp(any(MemberSignUpRequest.class)))
             .thenThrow(new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다."));
 
         // When & Then

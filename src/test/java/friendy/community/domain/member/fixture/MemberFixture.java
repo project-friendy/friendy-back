@@ -18,7 +18,8 @@ public class MemberFixture {
             "example@friendy.com",
             "bokSungKim",
             "password123!",
-            LocalDate.parse("2002-08-13"));
+            LocalDate.parse("2002-08-13"),
+            "https://test.com/test");
         return new Member(request,encrypted,"salt");
     }
 
