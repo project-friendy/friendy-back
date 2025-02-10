@@ -98,7 +98,7 @@ public class S3service {
         String contentType = multipartFile.getContentType();
 
         if (contentType == null) {
-            throw new IllegalArgumentException("파일 타입을 가져올 수 없습니다.");
+            throw new FriendyException(ErrorCode.INVALID_FILE, "파일타입을 가져올수 없습니다.");
         }
 
         return contentType;  // 예: image/jpeg, application/pdf
@@ -112,8 +112,8 @@ public class S3service {
         }
     }
 
-    public void moveS3Object(String imageUrl, String newDirName) {
-        String oldKey = extractFileName(imageUrl);
+    public String moveS3Object(String imageUrl, String newDirName) {
+        String oldKey = extractFilePath(imageUrl);
 
         // 2. 새 경로로 객체 키 생성
         String fileName = oldKey.substring(oldKey.lastIndexOf("/") + 1); // 파일명만 추출
@@ -121,6 +121,9 @@ public class S3service {
 
         // 3. 객체 복사 (기존 위치 → 새 위치)
         copyObject(bucket, oldKey, bucket, newKey);
+
+        return s3Client.getUrl(bucket, newKey).toString();
+
 
     }
 
@@ -131,24 +134,24 @@ public class S3service {
         s3Client.copyObject(copyObjectRequest);
     }
 
-    public String extractFileName(String imageUrl) {
+    public String extractFilePath(String imageUrl) {
         try {
-            URL url = new URL(imageUrl);  // URL 객체 생성
-            String path = url.getPath();  // "/profile/user123.jpg"
-            return path.startsWith("/") ? path.substring(1) : path;  // 첫 '/' 제거
-        } catch (MalformedURLException e) {  // MalformedURLException 사용
+            URL url = new URL(imageUrl);
+            String path = url.getPath();
+            return path.startsWith("/") ? path.substring(1) : path; // 앞의 '/' 제거
+        } catch (MalformedURLException e) {
             throw new FriendyException(ErrorCode.INVALID_FILE, "유효한 URL 형식이어야 합니다.");
         }
     }
+
 
     public String getContentTypeFromS3(String key) {
         try {
             S3Object object = s3Client.getObject(new GetObjectRequest(bucket, key));
             return object.getObjectMetadata().getContentType();
-        } catch (AmazonServiceException e) {
-            // 예외 처리 (더 구체적인 예외 처리 가능)
-            System.err.println("Error getting object metadata: " + e.getMessage());
-            return null;
+        } catch (Exception e) {
+            throw new FriendyException(ErrorCode.INVALID_FILE, "파일타입을 가져올수 없습니다.");
+
         }
     }
 }
