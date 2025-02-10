@@ -14,7 +14,6 @@ import friendy.community.infra.storage.s3.service.S3service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +33,7 @@ public class MemberService {
         Member member = new Member(request, encryptedPassword, salt);
 
         if (request.imageUrl() != null) {
-            s3service.moveS3Object(request.imageUrl(), "profile");
-            String StoredFileName = request.imageUrl().substring(
-                request.imageUrl().lastIndexOf("/") -1);
-            MemberImage memberImage = MemberImage.of(request.imageUrl(),StoredFileName, s3service.getContentTypeFromS3(StoredFileName));
+            MemberImage memberImage = saveProfileImage(request);
             member.setMemberImage(memberImage);
         }
         memberRepository.save(member);
@@ -69,5 +65,12 @@ public class MemberService {
         if (memberRepository.existsByNickname(name)) {
             throw new FriendyException(ErrorCode.DUPLICATE_NICKNAME, "닉네임이 이미 존재합니다.");
         }
+    }
+
+    public MemberImage saveProfileImage(MemberSignUpRequest request) {
+        String imageUrl = s3service.moveS3Object(request.imageUrl(), "profile");
+        String s3Key = s3service.extractFilePath(imageUrl);
+        String fileType = s3service.getContentTypeFromS3(s3Key);
+        return MemberImage.of(imageUrl, s3Key ,fileType);
     }
 }
