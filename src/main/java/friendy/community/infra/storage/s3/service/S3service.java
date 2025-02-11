@@ -1,6 +1,5 @@
 package friendy.community.infra.storage.s3.service;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -11,9 +10,7 @@ import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,27 +49,25 @@ public class S3service {
         }
     }
 
-    private File convert(MultipartFile file) {
+    public File convert(MultipartFile file) {
+        File convertFile = null;
+
+        // 임시 경로에 파일 생성
         try {
-            // 임시 경로에 파일 생성
-            File convertFile = new File(System.getProperty("java.io.tmpdir"), file.getOriginalFilename());
-
-            // 파일 생성 실패 시 예외 발생
-            if (!convertFile.createNewFile()) {
-                throw new FriendyException(ErrorCode.INVALID_FILE, "파일 생성에 실패했습니다.");
-            }
-
-            // 파일에 데이터 쓰기
-            try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-                fos.write(file.getBytes());
-            }
-            return convertFile;
-
+            convertFile = new File(System.getProperty("java.io.tmpdir"), file.getOriginalFilename());
+            convertFile.createNewFile();  // 파일 생성
         } catch (IOException e) {
-            throw new FriendyException(ErrorCode.FILE_IO_ERROR, "I/O 오류 발생");
+            throw new FriendyException(ErrorCode.INVALID_FILE, "파일 생성에 실패했습니다.");
         }
-    }
 
+        // 파일에 데이터 쓰기
+        try (FileOutputStream fos = new FileOutputStream(convertFile)) {
+            fos.write(file.getBytes());
+        } catch (IOException e) {
+            throw new FriendyException(ErrorCode.FILE_IO_ERROR, "I/O 오류가 발생했습니다.");
+        }
+        return convertFile;
+    }
 
     private String putS3(File uploadFile, String fileName) {
         // S3에 파일을 업로드한다.
@@ -86,7 +81,7 @@ public class S3service {
         String originalFileName = multipartFile.getOriginalFilename();
 
         if (originalFileName == null) {
-            throw new IllegalArgumentException("파일 이름을 가져올 수 없습니다.");
+            throw new FriendyException(ErrorCode.INVALID_FILE ,"파일 이름을 가져올 수 없습니다.");
         }
         // 원본 파일 이름에서 확장자 추출
         String extension = originalFileName.substring(originalFileName.lastIndexOf("."));

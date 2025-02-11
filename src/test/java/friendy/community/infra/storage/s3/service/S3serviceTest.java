@@ -6,6 +6,7 @@ import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -16,13 +17,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -39,6 +41,12 @@ class S3serviceTest {
 
     @Mock
     private S3exception s3exception;  // S3exception mock 객체
+
+    @Mock
+    private File file;
+
+    @Mock
+    MultipartFile multipartFile;
 
     @BeforeEach
     void setUp() {
@@ -60,20 +68,19 @@ class S3serviceTest {
         assertThat(actualUrl).isEqualTo(tempUrl);
     }
 
-
     @Test
-    void upload_실패_빈파일() {
-        // Given: MockMultipartFile을 비어있는 파일로 설정
-        MockMultipartFile multipartFile = new MockMultipartFile("file", "", "image/jpeg", new byte[0]);
+    public void testConvert_FileCreationFailure() throws IOException {
+        // given
+        MultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test content".getBytes());
+        when(file.createNewFile()).thenReturn(false); // 파일 생성 실패 시뮬레이션
 
-        // When: s3exception.validateFile() 메소드가 빈 파일일 때 FriendyException을 던지도록 설정
-        doThrow(new FriendyException(ErrorCode.INVALID_FILE, "파일이 비어 있습니다.")).when(s3exception).validateFile(any(MultipartFile.class));
-
-        // Then: validateFile에서 FriendyException이 발생하는지 검증
+        // when, then
         assertThrows(FriendyException.class, () -> {
-            s3service.upload(multipartFile, "test-dir");  // 빈 파일일 경우 예외가 던져져야 함
-        });
+            s3service.convert(multipartFile);
+        }, "파일 생성에 실패했습니다.");
     }
+
+
     @Test
     void moveS3Object_성공() throws MalformedURLException {
         // Given
@@ -91,6 +98,29 @@ class S3serviceTest {
         verify(s3Client).copyObject(any()); // copyObject 호출 확인
     }
 
+    @Test
+    void testGenerateStoredFileName_FileNameNotFoundException() {
+        // Given
+        when(multipartFile.getOriginalFilename()).thenReturn(null);
+
+        assertThrows(FriendyException.class, () -> {
+            s3service.generateStoredFileName(multipartFile,"upload");
+        }, "파일 이름을 가져올 수 없습니다.");
+
+    }
+
+    @Test
+    public void testConvert_WriteFileFailure() throws IOException {
+        // given
+        MultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test content".getBytes());
+        when(file.createNewFile()).thenReturn(true);
+        when(new FileOutputStream(any(File.class))).write(any(byte[].class))).thenThrow(new IOException("디스크 공간 부족"));
+
+        // when, then
+        assertThrows(FriendyException.class, () -> {
+            s3service.convert(multipartFile);
+        }, "I/O 오류 발생");
+    }
 
 
 }
