@@ -11,7 +11,9 @@ import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,11 +28,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class S3service {
+
+
     private final AmazonS3 s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
 
     private final S3exception s3exception;
 
@@ -93,17 +96,6 @@ public class S3service {
         return dirName + "/" + uuid + extension; // 예: 123e4567-e89b-12d3-a456-426614174000.jpg
     }
 
-    public String getFileType(MultipartFile multipartFile) {
-        // 파일의 MIME 타입(파일 타입) 확인
-        String contentType = multipartFile.getContentType();
-
-        if (contentType == null) {
-            throw new FriendyException(ErrorCode.INVALID_FILE, "파일타입을 가져올수 없습니다.");
-        }
-
-        return contentType;  // 예: image/jpeg, application/pdf
-    }
-
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {
             log.info("파일이 삭제되었습니다.");
@@ -124,14 +116,17 @@ public class S3service {
 
         return s3Client.getUrl(bucket, newKey).toString();
 
-
     }
 
-    public void copyObject(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey) {
+    private void copyObject(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey) {
         CopyObjectRequest copyObjectRequest = new CopyObjectRequest(
             sourceBucket, sourceKey,
             destinationBucket, destinationKey);
-        s3Client.copyObject(copyObjectRequest);
+        try {
+            s3Client.copyObject(copyObjectRequest);
+        } catch (FriendyException e) {
+            throw new FriendyException(ErrorCode.INTERNAL_SERVER_ERROR,"S3 객체 복사에 실패했습니다");
+        }
     }
 
     public String extractFilePath(String imageUrl) {
