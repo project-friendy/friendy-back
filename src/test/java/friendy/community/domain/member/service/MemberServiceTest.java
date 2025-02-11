@@ -12,18 +12,18 @@ import friendy.community.domain.member.repository.MemberRepository;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.service.S3service;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,89 +37,50 @@ import static org.mockito.Mockito.*;
 class MemberServiceTest {
 
 
-    @Mock
+    @Autowired
     private MemberRepository memberRepository;  // MemberRepository Mock
 
-    @Mock
+    @MockitoBean
     private S3service s3Service;  // S3Service Mock
 
-    @Mock
+    @Autowired
     private SaltGenerator saltGenerator;  // SaltGenerator Mock
 
-    @Mock
+    @Autowired
     private PasswordEncryptor passwordEncryptor;  // PasswordEncryptor Mock
 
-    @Mock
+    @Autowired
     private AuthService authService;
 
-    @InjectMocks
+    @Autowired
     private MemberService memberService;  // Mock된 의존성들이 주입된 MemberService
+
+    @Autowired
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);  // Mockito 초기화
+        resetMemberIdSequence();
+    }
+
+    private void resetMemberIdSequence() {
+        entityManager.createNativeQuery("ALTER TABLE member AUTO_INCREMENT = 1").executeUpdate();
     }
 
     @Test
     @DisplayName("회원가입이 성공적으로 처리되면 회원 ID를 반환한다")
     void signUpSuccessfullyReturnsMemberId() {
         // Given
-        Member member = MemberFixture.memberFixture();
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-            member.getEmail(),
-            member.getNickname(),
-            member.getPassword(),
-            member.getBirthDate(),
-            null  // 프로필 사진 URL은 null로 설정
+        MemberSignUpRequest request = new MemberSignUpRequest(
+            "test@email.com", "testNickname", "password123!",  LocalDate.parse("2002-08-13"),null
         );
-
-        // mock memberRepository의 동작: 회원을 저장한 후, 저장된 회원을 반환
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
-
         // When
-        Long savedId = memberService.signUp(memberSignUpRequest);  // 회원 가입 처리
-        Optional<Member> actualMember = memberRepository.findById(savedId);  // 저장된 회원 조회
-
+        Long memberId = memberService.signUp(request);
         // Then
-        assertThat(actualMember).isPresent();  // 회원이 정상적으로 저장되었는지 확인
-        assertThat(actualMember.get().getEmail()).isEqualTo(member.getEmail());  // 이메일이 일치하는지 확인
-
-        // S3Service의 moveS3Object 메서드는 호출되지 않음 (이미지 URL이 null이므로)
-        verify(s3Service, never()).moveS3Object(anyString(), anyString());
-
-        // saltGenerator와 passwordEncryptor 메서드 호출 여부 확인 (이미지 URL은 null이므로)
-        verify(saltGenerator).generate();
-        verify(passwordEncryptor).encrypt(anyString(), anyString());
+        assertThat(memberId).isEqualTo(1L); // 반환 값 검증
     }
 
-    @Test
-    @DisplayName("회원가입이 성공적으로 처리되면 회원 ID를 반환한다")
-    void signUpSuccessfullyReturnsMemberId1() {
-        // Given
-        Member member = MemberFixture.memberFixture();
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(
-            member.getEmail(),
-            member.getNickname(),
-            member.getPassword(),
-            member.getBirthDate(),
-            null  // 프로필 사진 URL은 null로 설정
-        );
-
-        // mock memberRepository의 동작: 회원을 저장한 후, 저장된 회원을 반환
-        when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member)); // findById mock 추가
-        when(memberRepository.save(any(Member.class))).thenReturn(member);
-
-        // When
-        Long savedId = memberService.signUp(memberSignUpRequest);  // 회원 가입 처리
-        Optional<Member> actualMember = memberRepository.findById(savedId);  // 저장된 회원 조회
-
-        // Then
-        assertThat(actualMember).isPresent();  // 회원이 정상적으로 저장되었는지 확인
-        assertThat(actualMember.get().getEmail()).isEqualTo(member.getEmail());  // 이메일이 일치하는지 확인
-
-        // S3Service의 moveS3Object 메서드는 호출되지 않음 (이미지 URL이 null이므로)
-        verify(s3Service, never()).moveS3Object(anyString(), anyString());
-    }
     @Test
     @DisplayName("이메일이 중복되면 FriendyException을 던진다")
     void throwsExceptionWhenDuplicateEmail() {
@@ -180,21 +141,26 @@ class MemberServiceTest {
     void signUpwithimageSuccessfullyReturnsMemberId() {
         // Given
 
-        Member member = MemberFixture.memberFixture();
-        MemberSignUpRequest memberSignUpRequest = new MemberSignUpRequest(member.getEmail(), member.getNickname(), member.getPassword(), member.getBirthDate(),"https://friendybucket.s3.us-east-2.amazonaws.com/temp/5f48c9c9-76eb-4309-8fe5-a2f31d9e0d53.jpg");
-
+        MemberSignUpRequest request = new MemberSignUpRequest(
+            "test@email.com", "testNickname", "password123!",  LocalDate.parse("2002-08-13"),
+            "https://friendybucket.s3.us-east-2.amazonaws.com/temp/5f48c9c9-76eb-4309-8fe5-a2f31d9e0d53.jpg"
+        );
         // When
+        String expectedImageUrl = "https://friendybucket.s3.us-east-2.amazonaws.com/profile/5f48c9c9-76eb-4309-8fe5-a2f31d9e0d53.jpg";
+        String expectedFilePath = "profile/5f48c9c9-76eb-4309-8fe5-a2f31d9e0d53.jpg";
+
         MemberImage expectedMemberImage = new MemberImage("https://www.example.com/test-image.jpg", "mocked-file-path", "image/png");
 
-        when(memberService.saveProfileImage(any(MemberSignUpRequest.class)))
-            .thenReturn(expectedMemberImage);
+        when(s3Service.moveS3Object(request.imageUrl(), "profile")).thenReturn(expectedImageUrl);
+        when(s3Service.extractFilePath(anyString())).thenReturn(expectedFilePath);
+        when(s3Service.getContentTypeFromS3(anyString())).thenReturn("jpeg");
 
-        Long savedId = memberService.signUp(memberSignUpRequest);
-        Optional<Member> actualMember = memberRepository.findById(savedId);
+
+        Long memberId = memberService.signUp(request);
 
         // Then
-        assertThat(actualMember).isPresent();
-        assertThat(actualMember.get().getEmail()).isEqualTo(member.getEmail());
+        assertThat(memberId).isEqualTo(1L); // 반환 값 검증
+        verify(s3Service).moveS3Object(request.imageUrl(), "profile");
     }
 
 }
