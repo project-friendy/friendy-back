@@ -1,6 +1,9 @@
 package friendy.community.infra.storage.s3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
@@ -26,6 +29,7 @@ import java.net.URL;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 
@@ -68,18 +72,6 @@ class S3serviceTest {
         assertThat(actualUrl).isEqualTo(tempUrl);
     }
 
-    @Test
-    public void testConvert_FileCreationFailure() throws IOException {
-        // given
-        MultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test content".getBytes());
-        when(file.createNewFile()).thenReturn(false); // 파일 생성 실패 시뮬레이션
-
-        // when, then
-        assertThrows(FriendyException.class, () -> {
-            s3service.convert(multipartFile);
-        }, "파일 생성에 실패했습니다.");
-    }
-
 
     @Test
     void moveS3Object_성공() throws MalformedURLException {
@@ -110,17 +102,30 @@ class S3serviceTest {
     }
 
     @Test
-    public void testConvert_WriteFileFailure() throws IOException {
+    void getContentTypeFromS3_정상적인_파일타입_가져오기() {
         // given
-        MultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "test content".getBytes());
-        when(file.createNewFile()).thenReturn(true);
-        when(new FileOutputStream(any(File.class))).write(any(byte[].class))).thenThrow(new IOException("디스크 공간 부족"));
+        S3Object s3Object = new S3Object();
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType("image/png");
+        s3Object.setObjectMetadata(metadata);
 
-        // when, then
-        assertThrows(FriendyException.class, () -> {
-            s3service.convert(multipartFile);
-        }, "I/O 오류 발생");
+        when(s3Client.getObject(any(GetObjectRequest.class))).thenReturn(s3Object);
+        // when
+        String result = s3service.getContentTypeFromS3("test");
+
+        // then
+        assertThat(result).isEqualTo("image/png");
     }
 
+    @Test
+    void getContentTypeFromS3_정상적인_파일타입_가져오지못함() {
+        // given
 
+        when(s3Client.getObject(any(GetObjectRequest.class))).
+            thenThrow(new FriendyException(ErrorCode.INVALID_FILE,"파일타입을 가져올수 없습니다."));
+
+        assertThrows(FriendyException.class, () -> {
+            s3service.getContentTypeFromS3("test");
+        });
+    }
 }
