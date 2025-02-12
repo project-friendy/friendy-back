@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URL;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.in;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -126,6 +127,15 @@ class S3serviceTest {
 
         assertThrows(FriendyException.class, () -> {
             s3service.getContentTypeFromS3("test");
+        });
+    }
+
+    @Test
+    void extractFilePath_유효하지않은URL형식_FriendyException발생() {
+        String invalidUrl = "invalid-url";
+
+        assertThrows(FriendyException.class, () -> {
+            s3service.extractFilePath(invalidUrl);
         });
     }
 }
