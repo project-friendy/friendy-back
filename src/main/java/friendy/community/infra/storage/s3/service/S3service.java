@@ -1,10 +1,7 @@
 package friendy.community.infra.storage.s3.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import friendy.community.global.exception.ErrorCode;
 import friendy.community.global.exception.FriendyException;
 import friendy.community.infra.storage.s3.exception.S3exception;
@@ -17,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -38,42 +36,20 @@ public class S3service {
 
         s3exception.validateFile(multipartFile);
 
-        // (1) MultipartFile을 File로 변환
-        File uploadFile = convert(multipartFile);
-
-        // (3)S3에 파일을 업로드. 업로드 완료 여부와 관계 없이 (1)에서 임시 경로에 생성된 파일을 삭제
-        try {
-             return putS3(uploadFile, generateStoredFileName(multipartFile,dirName));
-        } finally {
-            removeNewFile(uploadFile);
-        }
+        return putS3(multipartFile, generateStoredFileName(multipartFile,dirName));
     }
 
-    public File convert(MultipartFile file) {
-        File convertFile = null;
+    private String putS3(MultipartFile multipartFile, String uuidFileName) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(multipartFile.getSize());
+        metadata.setContentType(multipartFile.getContentType());
 
-        // 임시 경로에 파일 생성
-        try {
-            convertFile = new File(System.getProperty("java.io.tmpdir"), file.getOriginalFilename());
-            convertFile.createNewFile();  // 파일 생성
+        try (InputStream inputStream = multipartFile.getInputStream()) {
+            s3Client.putObject(bucket, uuidFileName, inputStream, metadata); // UUID 파일명으로 S3에 저장
         } catch (IOException e) {
-            throw new FriendyException(ErrorCode.INVALID_FILE, "파일 생성에 실패했습니다.");
+            throw new FriendyException(ErrorCode.FILE_IO_ERROR, "S3 업로드 중 오류 발생");
         }
-
-        // 파일에 데이터 쓰기
-        try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-            fos.write(file.getBytes());
-        } catch (IOException e) {
-            throw new FriendyException(ErrorCode.FILE_IO_ERROR, "I/O 오류가 발생했습니다.");
-        }
-        return convertFile;
-    }
-
-    private String putS3(File uploadFile, String fileName) {
-        // S3에 파일을 업로드한다.
-        s3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
-        // 업로드된 파일의 경로를 가져온다.
-        return s3Client.getUrl(bucket, fileName).toString();
+        return s3Client.getUrl(bucket, uuidFileName).toString(); // UUID 파일명으로 URL 반환
     }
 
     public String generateStoredFileName(MultipartFile multipartFile, String dirName) {
@@ -89,14 +65,6 @@ public class S3service {
         String uuid = UUID.randomUUID().toString();
         // 고유한 파일 이름 반환
         return dirName + "/" + uuid + extension; // 예: 123e4567-e89b-12d3-a456-426614174000.jpg
-    }
-
-    private void removeNewFile(File targetFile) {
-        if (targetFile.delete()) {
-            log.info("파일이 삭제되었습니다.");
-        } else {
-            log.info("파일이 삭제되지 못했습니다.");
-        }
     }
 
     public String moveS3Object(String imageUrl, String newDirName) {
